@@ -1,0 +1,960 @@
+%!
+%% fem el cub de Gerrit Noordzij: un cub isomètric, fugant a mestral (NO) construït amb 5 plans quadrats de 5x5 glifs per pla
+%% observant el cub original a la portada del llibre «De streek Theorie van het schrift»
+%% https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg
+%% podem veure que el tipus utilitzat treballa en 3 eixos dinàmics:
+%% a l'eix de les X evoluciona el pes, d'esquerra a dreta, de fina a negreta
+%% a l'eix de les y evoluciona la serifa, de dalt a baix, de punxa a escapçat
+%% a l'eix de les Z evoluciona el contrast, de davant a darrera (fugant cap el NO) de menys contrast a més contrast
+
+%% per clonar-ho hauríem de localitzar una tipografia que tingués aquests 3 eixos dinàmics (pes, serifa, contrast)
+
+%% però tenim d'altres alternatives:
+%% AdobeSans (Serif) MM, sempre el mateix glif, X,Y: pes, Z: ample
+%% implementat: en un mateix pla, l'ample es manté i els pesos extrems són al UR (màxim pes) i al LL (mínim pes) 
+%% el pes a les columnes ara va de baix a dalt i l'ample va de més estret (primer pla) a més ample (pla final de fuga) 
+%% AdobeSans (Serif) MM, X: pes, Y: sèrie de /ncub glifsi (però mantenint el pes en vertical), Z: ample
+%% per implementar
+%% AdobeMinion, sempre el mateix glif, X: pes , Y: ample , Z: correcció òptica
+%% per implementar
+
+%% definim un seguit de paràmetres dinàmics i activem les lleixes de pdf (Optinal Content)
+%% aquest algorisme podria beure de valors aleatoris cada cop que s'executi
+%% aquest algorisme és ideal per fer-ne un paral·lel mirall entre l'ús de les MM i les vOTF via js/canvas/CSS/SVG
+
+%% Origin_of_Patterning_LU_OPT.pdf (pàg.233)
+%% «The ranges of sort of contrast and reduction of contrast can be set out on
+%% dimensions of a cube [...] My description of the cube is a mixture of
+%% technology, design, cultural history, and psychology with a flavor of
+%% cultural anthropology; a square kind of fortune-telling»
+%% Gerrit Noordzij «The Shape of the Stroke» Raster Imaging and Digital Typography
+%% (New York: Cambridge University Press, 1991), pp. 34-42 (p.38)
+%% https://www.typemag.org/post/it-all-starts-with-writing-gerrit-noordzij
+
+%% generem un espai de coordenades en fals 3D i perspectiva isomètrica (x120 y120 z120)
+%% per les limitacions actuals del intèrpret GS, treballem amb tipografies MM
+%% escollim un glif
+%% generem n graelles de nxn glifs (el cub de Noordzij n val 5)
+%% en el pla x,y les caselles s'ordenen de dalt a baix i d'esquerra a dreta
+%% a l'eix 2D x,y treballem amb 1 eix dinàmic (p.e. pes o ample)
+%% en el pla z les caselles s'ordenen de dreta a esquerra (fuga cap a l'esquerra)
+%% a l'eix 3D z treballem amb 1 eix dinàmic (p.e. contrast del ductus o color)
+%% cadascun dels plans 3D hauria d'estar en una lleixa
+%% el càlcul del format de pàgina hauria d'anar en funció del cos escollit
+%% o el cos hauria d'anar en funció del format de pàgina escollit
+
+%%Assaig del comptador per veure com creix la distribució dins el cub
+false
+/Acmptdr exch def
+
+%% escollim el nombre de glifs, ídem pels 3 costats xyz del cub
+5  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+/ncub exch def
+
+
+%% escollim un glif pel seu nom, pel seu decimal o una paraula dins una string?
+Acmptdr
+{
+ ncub dup mul ncub mul 64 string cvs
+}
+{
+ /e  %% /e  %% 101 decimal  %% (ei)
+}ifelse
+/glif exch def
+
+%% el tractem com el tractem, sempre l'acabem convertint en una string
+glif type /integertype eq
+{
+ 1 string dup 0 glif put /glif exch def
+}
+{
+ glif type /nametype eq
+ {
+  systemdict /EncodingDirectory get /WinAnsiEncoding get /xifrat exch def
+  xifrat length 1 sub 0 exch 1 exch
+  {
+   dup xifrat exch get glif eq
+   {
+    1 string dup 0 4 -1 roll put /glif exch def exit
+   }
+   {
+    pop
+   }ifelse
+  }for
+  glif type /nametype eq
+  {
+   (\n\n >>> no hem trobat el glif, pleguem!\n\n)print flush quit
+  }if
+ }
+ {  %% stringtype
+
+ }ifelse
+}ifelse
+
+
+%% escollim un cos
+24
+/cosglif exch def
+
+
+%% escollim el format de pàgina
+595 842  %% ample, alt
+2 array astore /fPagina exch def
+
+
+%% el format de pàgina en funció del cos (true) o el cos en funció del format de pàgina (false)
+true
+/paginaVScos exch def  %% aquesta variable encara no actua (fa com si sempre fos a true)
+
+
+%% activem les lleixes? %%OC Optional Content
+true
+/FEMlleixes exch def
+
+
+%% escollim la tipografia MM
+(/Users/femfum/MultipleMaster/AdobeSans_AdobeSerif/ZX______.PFB)
+/tipusMM exch def
+
+
+%% explorem els eixos dinàmics de la MM i els llistem per triar amb quins treballarem
+%%MÈTODE0 d'anàlisi dels eixos mestres d'una MM
+%% extraiem els valors mínims, intermitjos (si n'hi han) i màxims, de cadascun dels eixos dinàmics de la MM
+%% fem un diccionari amb tots els eixos de variabilitat i els seus valors mestres dins una array
+/AsansMMeixosDinamics 0 dict def
+tipusMM findfont dup /FontInfo get dup /FIMM exch def
+/BlendAxisTypes get length 1 sub 0 exch 1 exch
+{
+ /araEix exch def
+ AsansMMeixosDinamics 
+ FIMM /BlendAxisTypes get araEix get
+ [  %% potser que l'eix de mescla sigui linial entre més de dos valors (p.e. l'eix de correcció òptica segueix aquesta lògica)
+  FIMM /BlendDesignMap get araEix get
+  {aload pop pop}forall
+ ] put
+}for
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get def  %% xifrat WinAnsi
+currentdict end /Camaleonica_WA exch definefont pop
+%% mooolt important: carreguem una (1) sola vegada el diccionari genèric ben xifrat de la MM
+/Camaleonica_WA findfont /AsansMMionari exch def
+
+%% test/menú
+%AsansMMeixosDinamics
+%{pop ==}forall
+%(!!!!)pstack quit
+
+
+%% escollim els 2 eixos dinàmics amb els que volem treballar
+/Weight  %% pes
+/xyeix exch def
+/Width  %% ample
+/zeix exch def
+
+
+%% escollim l'orientació (fuga) de la z (true: esquerra, false: dreta)
+%% però s'hauria de poder triar entre els 4 vents: NO (mestral), SO (garbí), SE (xaloc) i NE (gregal)
+true
+/zed exch def
+
+
+%% calculem el valor de la casella quadrada on pintarem cada glif (en funció del valor màxim de /zeix i /xyeix)
+%% fem la instancia, per 1 glif, amb els valors màxims de /zeix i /xyeix
+%%MÈTODE1 per generar una instància MM via array del vector, a partir dels valors possibles fixats pel /BlendDesignMap
+%% Paul Haahr dóna aquest mètode com més estable...
+/unaInstanciaDelAsansMM  %% literal per definir la instància concreta que generem
+%% /MinionMM findfont  %% aquí substituïm la crida original pel seu diccionari ja normalitzat a WinAnsi...
+AsansMMionari
+dup begin  %% entrem dins el diccionari de la MM per poder cridar els procediments NormalizeDesignVector i ConvertDesignVector
+[  %% array del vector que treballarà makeblendedfont
+ %% el seu ordre (fixat per /BlendAxisTypes) i els seus valors possibles (fixats per /BlendDesignMap)
+ %% necessitem obligatòriament tantes dades vàlides com eixos dinàmics de la MM
+ %%AdobeSansMM
+%%Si fem l'aleatori hauríem de poder establir el valor mínim i el màxim
+% realtime srand  %% perquè les 2 crides rand variïn, plantem la llavor de l'aleatori només 1 vegada
+% 50 rand 1401 mod add  %% pes: entre 0 i 1400
+% 50 rand 1401 mod add  %% ample: entre 0 i 1400
+
+%pop pop [261 228] aload pop  %% un de les millors tries tipogràfiques
+
+%%VALORS EXTREMS de pes i ample (per aquest ordre) de l' AdobeSans MM
+ [1450 1450] aload pop  %% tot al màxim
+ % [50 1450] aload pop  %% mínim pes màxim ample
+ % [1450 50] aload pop  %% màxim pes mínim ample
+ % [50 50] aload pop  %% mínim pes mínim ample
+
+%%SNRD pes i ample random o no per aquí mateix de moment (a ús global en d'altres pàgines)
+ true setglobal
+ 2 copy 2 array astore
+ globaldict exch
+ /ARApesiampleRandomOno exch put
+ false setglobal
+
+ %% aquests dos procediments, i per aquest ordre, generen les dades necesàries del vector dins l'array
+ NormalizeDesignVector  %% normalitza les dades de cada eix mestre en valors entre 0 i 1
+ ConvertDesignVector  %% genera les dades finals pel seu ús dins la matriu de l'array per a makeblendedfont
+] end
+makeblendedfont
+definefont  %% fixem la font en memòria
+dup
+%% calculem el % de l'ascendent/descendent d'aquesta instància per tal de situar bé la línia de base en relació a ?
+/FontBBox get dup 1 get abs dup 3 -1 roll 3 get add exch 100 mul exch div dup /AsansMMx100descendent exch def
+100 exch sub /AsansMMx100asdescendent exch def
+/instantMAX exch def  %% diccionari de la instància amb els seus valors màxims
+
+
+%% generem l'array tridimensional de valors de pes/ample que alimentarà el generador d'instàncies
+/ii 0 def  %% comptador d'instàncies per personalitzar-ne el nom
+%% calculem el salt de l'ample (max - min : /ncub)
+AsansMMeixosDinamics zeix get aload pop exch sub ncub 1 sub div /saltZeix exch def
+1450 /maxAMPLE exch def  50 /minAMPLE exch def  %% valors màxim i mínim d'ample
+
+%% calculem el salt del pes ((max - min : /ncub x /ncub)
+AsansMMeixosDinamics xyeix get aload pop exch sub ncub dup mul 1 sub div /saltXYeix exch def
+1450 /maxPES exch def  50 /minPES exch def  %% valors màxim i mínim de pes
+
+%% la descripció que fem és pel cub clàssic de 5x5 (però no pas la funcionalitat)
+true setglobal  %% no sabem si és del tot imprescindible
+[  %% conté tants arrays com /ncub
+
+%%Ordena l'eix Z (fuga) del cub
+% 0 1 ncub 1 sub  %% comença amb els glifs més amples al davant (primer pla del cub)
+ ncub 1 sub -1 0  %% comença amb els glifs més estrets al davant (primer pla del cub)
+
+ {  %% for per a cadascun dels amples (1 per pla)
+  %% els amples (índex 1) només canvien 5 cops (un per cada pla) d'estreta a ample, del fons al primer pla
+  %% EP! però l'índex va de 4 a 0, o sigui que a 4 hi haurà d'anar el valor més estret i a zero el valor més ample  
+  saltZeix mul maxAMPLE exch sub round cvi /araPLAample exch def  %% ha de ser un valor enter!
+  [  %% obrim pla
+   /araPES 0 def
+   ncub
+   {  %% repeat de 5 columnes per pla
+    %% l'índex va de 0 a 4 perquè les columnes van d'esquerra a dreta
+    [  %% obrim columna
+     0 1 ncub 1 sub
+     {  %% for els pesos (índex 0) canvien 25 cops per pla (5 per cada columna) de fina a negreta
+      [  %% cada glif amb la seva instància, 5 glifs d'1 columna
+       exch saltXYeix mul maxPES exch sub round cvi  %% pes
+       %% l'índex va de 4 a 0 perquè els glifs van de dalt a baix, o sigui a 4 hi ha d'anar el valor més fi i a 0 el més negret
+       araPLAample  %% ample
+      ]  %% cada glif amb la seva instància
+     }for
+     %% aquí hem de desar el darrer valor de l'ample per la següent columna
+     dup 0 get saltXYeix sub /maxPES exch def
+
+%%Ordena els glifs de la columna, el més negre a dalt 
+  %% aquest loop capgira tots els elements trobats a la pila
+  counttomark dup 1 gt
+  {  %% capgirem sempre que hi hagi més d'un paquet
+   /atura't exch def
+   /ici 2 def
+   {ici -1 roll ici 1 add /ici exch def ici atura't gt {exit} if} loop
+   %% NO ens carreguem la mark
+   % atura't 1 add -1 roll pop
+  }
+  {
+   pop exch pop /atura't 1 def
+  } ifelse
+
+    ]  %% tanquem columna
+
+   }repeat
+
+   %% aquí hem de incialitzar cap valor?
+   1450 /maxPES exch def
+
+%%Ordena les columnes, la més negre a la dreta del pla
+  %% aquest loop capgira tots els elements trobats a la pila
+  counttomark dup 1 gt
+  {  %% capgirem sempre que hi hagi més d'un paquet
+   /atura't exch def
+   /ici 2 def
+   {ici -1 roll ici 1 add /ici exch def ici atura't gt {exit} if} loop
+   %% NO ens carreguem la mark
+   % atura't 1 add -1 roll pop
+  }
+  {
+   pop exch pop /atura't 1 def
+  } ifelse
+
+  ]  %% tanquem pla
+ }for  %% per a cadascun dels amples (1 per pla)
+]
+
+%% podem ajustar a cada pla el pes del darrer glif de la darrera columna --l'índex 0 a /minPES-- per corregir la desviació d'1
+%dup
+%{  %% per cada pla
+% dup length 1 sub get  %% la darrera columna
+% dup length 1 sub get  %% el darrer glif
+% 0 minPES put
+%}forall
+
+%%TEST
+%dup == quit
+
+globaldict exch  %% no sabem si és del tot imprescindible
+/Ainstancies exch put  %% totes les instàncies del cub de Noordzij
+false setglobal
+
+gsave
+%% mètode stringwidth
+%0 0 moveto glif tipusMM cosglif selectfont stringwidth pop
+%% mètode bbox
+gsave
+%% llegim les coordenades del rectangle que inscriu el glif (bounding box), ignorant els nodes de control
+0 0 moveto
+%% tipusMM cosglif selectfont
+
+%% activem la instància amb els seus valors màxims per fer el càlcul de la casella que les contindrà totes
+instantMAX cosglif scalefont setfont
+
+glif  %% el caràcter dins una string
+true charpath flattenpath pathbbox
+%% avaluem el rectangle pur
+3 -1 roll abs add  %% altura Y
+3 1 roll exch abs add  %% amplada X
+2 copy gt
+{
+ pop
+}
+{
+ exch pop
+}ifelse
+
+%% si no li posem, si el glif no tingués variabilitat (cos/pes/ample) es tocarien pels 4 costats
+%false
+%{
+%% li sumem un #% de marges dins la casella (la meitat d'aquest valor és el marge que envoltarà el glif)
+dup 10  %% #% com és alt menys marge i més petit serà el format de pàgina (s'afegeix al cos del glif)
+div add
+grestore
+%}if
+/casellag exch def  %% afecta a la mida del glif dins la casella!
+
+%% fixem els graus de la projecció (perspectiva)
+30  %% 30º per la isomètrica (imprescindible a 30 si volem emular el cub de Noordzij)
+/geixos exch def
+
+
+%% valor de la tangent ideal per la isomètrica: és un multiplicador del valor del costat Y del quadrat de la lleixa
+geixos sin geixos cos div  %% valor de la tangent de l'angle /geixos (30ª) per l'eix X de la isomètrica
+/Ti exch def
+%%valor de la hipotenusa X que cal que la Y iguali
+casellag ncub mul dup dup mul exch Ti mul dup mul add sqrt /hY exch def
+
+
+%% igualem les mides dels dos eixos? (un cop en perspectiva l'eix X és més llarg que l'eix Y)
+true
+/iS exch def  %% imprescindible a true si volem emular el cub de Norrdzij
+
+
+%% comptador per avauar l'ordre d'escriptura dels glifs
+Acmptdr
+{
+ /ioe 0 def
+}if
+
+
+[  %% generem la matriu tridimensional (/ncub valors de Z)
+ %% posicionaríem i generaríem cadascun dels plans xy
+ %% 0 1 ncub 1 sub  %%EP! el cub fuga cap al SE (xaloc) però s'han de tocar d'altres coses per tal quadri amb el format de pàgina
+ ncub 1 sub -1 0  %% el cub fuga cap al NO (mestral) tal i com el va concebre Noordzij
+ {  %% for que genera els valors de cadascun dels plans xy en un sentit de fuga
+
+%%Hi pesquem l'índex de 4 a 0 de l'array de plans verticals pel grup de 5x5 glifs que pintaran el pla actual
+  dup Ainstancies
+  exch get
+
+%%FEM únic el nom de la variable
+%1 index dup /iApla exch def 64 string cvs dup length 1 add string dup 0 (A) putinterval dup 3 -1 roll 1 exch putinterval
+%cvn exch def
+
+%%Astack
+%true setglobal
+%globaldict exch
+%dup length array copy
+%(0000)pstack quit
+/Apla exch def
+%false setglobal
+
+  [
+%%Astack
+%(1111)pstack quit
+   exch
+%3 -1 roll
+
+   [  %% pla del cub, sigui virtual, ple, perfilat o retallador
+    exch
+    casellag mul casellag ncub mul  %% test 
+    zed
+    {
+     exch dup neg exch 3 -1 roll dup
+    }
+    {
+     exch dup 3 -1 roll dup
+    }ifelse
+   ]  
+
+%%Astack
+%% string com a proc
+(
+%   {  %% proc dels glifs
+
+    Acmptdr
+    {
+     %% test de lateralitat
+     /lat true def
+    }if
+
+    0 1 ncub 1 sub  %% fa les columnes d'esquerra a dreta
+    % ncub 1 sub -1 0  %% fa les columnes de dreta a esquerra
+    {  %% for que situa la columna d'instàncies al seu lloc
+
+%%Hi pesquem l'índex de 0 a 4 de l'array de pesos/amples pel grup de 5 glifs que pintaran la columna actual
+     dup
+
+)
+%%Astack
+
+%%Astack
+     Apla  %% pla vertical del cub
+
+%%Astack
+ %% cap de l'array del pla
+ exch dup length dup /ARAva exch def 2 add string dup 3 -1 roll 0 exch putinterval
+ dup ARAva ([\n) putinterval exch
+
+{  %% forall de la primera array
+
+ %% cap de l'array de columna
+ exch dup length dup /ARAva exch def 2 add string dup 3 -1 roll 0 exch putinterval
+ dup ARAva ([\n) putinterval exch
+
+ {  %% forall de la segona array
+
+  %% cap de l'array de valors
+  exch dup length dup /ARAva exch def 2 add string dup 3 -1 roll 0 exch putinterval
+  dup ARAva ([\n) putinterval exch
+
+  {  %% forall de l'array de valors
+   %% passem a string el primer valor
+   64 string cvs dup length dup /ARAva exch def 1 add string dup 3 -1 roll 0 exch putinterval
+   dup ARAva ( ) putinterval
+   %% encadenem el primer valor
+   dup length 2 index length dup /ARAva0 exch def add dup /ARAva1 exch def string dup 4 -1 roll 0 exch putinterval
+   dup 3 -1 roll ARAva0 exch putinterval
+  }forall
+
+  %% cua de l'array de valors
+  dup length dup /ARAva exch def 2 add string dup 3 -1 roll 0 exch putinterval
+  dup ARAva (]\n) putinterval
+
+ }forall
+
+ %% cua de l'array de columna
+ dup length dup /ARAva exch def 2 add string dup 3 -1 roll 0 exch putinterval
+ dup ARAva (]\n) putinterval
+
+}forall
+
+%% cua de l'array del pla
+dup length dup /ARAva exch def 2 add string dup 3 -1 roll 0 exch putinterval
+dup ARAva (]\n) putinterval
+
+
+%%Astack
+(
+
+%iApla 64 string cvs dup length 1 add string dup 0 (A) putinterval dup 3 -1 roll 1 exch putinterval
+%dup ==
+%cvx exec % (kkkkk)pstack quit
+
+     exch get
+
+dup length array copy
+%dup ==
+
+%%Astack
+     /Acolumna exch def  %% l'array amb la columna
+
+     gsave
+     casellag mul 0 translate
+
+      0 1 ncub 1 sub  %% pinta els glifs de baix a dalt
+     % ncub 1 sub -1 0  %% pinta els glifs de dalt a baix
+     {  %% for que genera una instància cada vegada i pinta el(s) glif(s)
+      gsave
+
+%%Hi pesquem l'índex de 4 a 0 dins l'array de pesos/amples del glif que es pinta a la columna de dalt a baix
+     dup
+
+%%Astack
+     Acolumna
+
+     dup length array copy exch get
+%%Profilaxi?
+%dup length array copy
+% dup ==
+
+%%Aquí generem la instància
+%%MÈTODE1 per generar una instància MM via array del vector, a partir dels valors possibles fixats pel /BlendDesignMap
+%% Paul Haahr dóna aquest mètode com més estable...
+
+%%Haurem de generar un nom únic?
+/unaInstanciaDelAsansMM  %% literal per definir la instància concreta que generem
+%ii 64 string cvs cvn
+%ii 1 add /ii exch def
+
+%% aquí substituïm la crida original pel seu diccionari ja normalitzat a WinAnsi...
+AsansMMionari
+dup begin  %% entrem dins el diccionari de la MM per poder cridar els procediments NormalizeDesignVector i ConvertDesignVector
+[  %% array del vector que treballarà makeblendedfont
+ %% el seu ordre (fixat per /BlendAxisTypes) i els seus valors possibles (fixats per /BlendDesignMap)
+ %% necessitem obligatòriament tantes dades vàlides com eixos dinàmics de la MM
+
+ 4 -1 roll
+
+%%TEST
+%dup length array copy dup ==
+
+ aload pop  %% despleguem els valors de la instància
+
+%%SNRD pes i ample random o no per aquí mateix de moment (a ús global en d'altres pàgines)
+% true setglobal
+% 2 copy 2 array astore
+% globaldict exch
+% /ARApesiampleRandomOno exch put
+% false setglobal
+
+ %% aquests dos procediments, i per aquest ordre, generen les dades necesàries del vector dins l'array
+ NormalizeDesignVector  %% normalitza les dades de cada eix mestre en valors entre 0 i 1
+ ConvertDesignVector  %% genera les dades finals pel seu ús dins la matriu de l'array per a makeblendedfont
+] end
+makeblendedfont
+definefont  %% fixem la font en memòria
+
+%%TEST
+%dup length dict copy
+
+      cosglif scalefont setfont
+
+
+      %% fem una roda de color per comprovar que l'ordre és el què voldrem per les instàncies?
+      false
+      {
+       lat
+       {
+        /lat false def
+        0 1 1 setrgbcolor
+       }
+       {  %%EP! nomès vàlid si fem el cub de 5x5
+        [ [ 0 0 0] [ 1 0 0] [ 0 1 0] [ 0 0 1] [ 1 1 0] ]
+        1 index get aload pop setrgbcolor
+       }ifelse
+      }
+      {  %% color dels glifs
+       0 0 0 setrgbcolor
+      }ifelse
+
+      %% càlcul per centrar el glif dins la casella quadrada
+      gsave
+      %% llegim les coordenades del rectangle que inscriu el glif (bounding box), ignorant els nodes de control
+      0 0 moveto
+      glif  %% el caràcter dins una string
+      true charpath flattenpath pathbbox
+
+      %% avaluem el rectangle pur
+      4 copy
+      3 -1 roll abs add  %% altura Y
+      3 1 roll exch abs add  %% amplada X
+
+      %% marges X del rectangle pur vs casella
+      casellag exch sub exch
+      %% marges Y del rectangle pur vs casella
+      hY ncub div dup /YsaltCasella exch def  %cosglif
+      exch sub
+      %% calculem l'orígen per tal quedi centrat dins la casella
+      2 div 5 -1 roll sub  %% origen Y
+      exch 2 div
+      5 -1 roll
+      %% quid del centrat!
+      pop  %% origen X 
+
+      grestore
+
+      exch 5 -1 roll YsaltCasella mul add
+      moveto pop pop
+
+      Acmptdr
+      {  %% escriu el nombre del comptador
+       ioe 64 string cvs ioe 1 add /ioe exch def
+      }
+      {  %% escriu el glif
+       glif
+      }ifelse
+
+      show  % glyphshow
+      grestore
+     }for  %% genera una instància cada vegada i pinta el(s) glif(s)
+
+     grestore
+    }for  %% situa la columna d'instàncies al seu lloc
+
+%%Astack
+)
+%% string com a proc
+%   }
+
+%%Astack
+%% empalmem 2 strings
+dup length exch 3 -1 roll dup length dup /ARAva exch def 4 -1 roll
+add string dup 3 -1 roll 0 exch putinterval dup ARAva 4 -1 roll putinterval
+
+  ]
+ }for  %% genera els valors de cadascun dels plans xy en un sentit de fuga
+]  %% matriu tridimensional (/ncub valors de Z)
+
+%dup ==
+
+%% el format de pàgina exacte seria, tenint en compte la perspectiva:
+%% per la Y, els valors transformats de la primera lleixa, sumant el valor Y del punt UR i el valor Y del punt LL
+%% mètode via transform/itransform
+gsave
+dup 0 get 0 get
+[  %% posem en perspectiva l'eix X amb el valor de la tangent /Ti de /geixos graus
+ 1
+
+ Ti
+ % geixos sin geixos cos div  %% valor de la tangent de l'angle /geixos (30ª) per l'eix X de la isomètrica
+ %  0  %% test
+
+ 0 1 0 0
+] concat
+aload pop pop hY
+transform  %% dóna les coordenades del punt x,y (eix normal) en unitats del dispositiu de sortida (device pixels)
+2 array astore 3 1 roll
+transform
+grestore
+itransform  %% dóna les coordenades del punt x,y (eix normal) en punts tipogràfics
+exch pop  %% conservem el valor de Y
+exch aload pop itransform
+exch pop add  %% valor net de Y que dóna l'altura exacta del cub en perspectiva
+/cNy exch def  %% distància Y (valor Y del cub de Noordzij)
+%% per la X (la perspectiva no l'afecta) la distància X entre la posició LL de la primera lleixa i la posició LR de la darrera
+dup 0 get 0 get 0 get abs  %% LL
+1 index ncub 1 sub get 0 get 2 get  %% LR
+add /cNx exch def  %% distància X (valor X del cub de Noordzij)
+
+%% definim els 4 marges de posicionament del cub a dins la pàgina
+50
+/mep exch def
+
+%% definim la pàgina
+<</PageSize[ cNx mep 2 mul add cNy mep 2 mul add ]>>setpagedevice
+
+%%OC cap
+FEMlleixes
+{
+%%+ LA CREACIÓ DELS OBJECTES ESTRUCTURALS DELS OPTIONAL CONTENTS QUE S'HAN DE GENERAR NOMÉS 1 COP S'HAURIEN DE DEFINIR AQUÍ
+%%+ aquí creem els objectes OC del Catalog que cal fer créixer
+ mark /_objdef {objCatalog} /type/dict /OBJ pdfmark  %% l'objecte diccionari a afegir a {Catalog}
+ mark /_objdef {objOCProperties} /type/dict /OBJ pdfmark  %% l'objecte diccionari a afegir a {objCatalog}
+ mark /_objdef {objD} /type/dict /OBJ pdfmark  %% l'objecte diccionari a afegir a {objOCProperties}
+ mark /_objdef {objOCGs} /type/array /OBJ pdfmark  %% l'objecte array a afegir a {objOCProperties}
+ mark {objD} << /BaseState /ON >> /PUT pdfmark  %% afegim una clau/valor fix a {objD}
+ mark {objD} << /ListMode /VisiblePages >> /PUT pdfmark  %% afegim una clau/valor fix a {objD}
+ mark /_objdef {objOrder} /type/array /OBJ pdfmark  %% l'objecte array de la clau /Order a afegir a {objD}
+%%Només l'inicialitzem un cop?
+ /iL 0 def  %% comptador de layers
+
+%%+ comprovarem si al generador de capes l'ordre dels factor no altera el producte
+ /lleiXes 1 dict def  %% inicialitzem on desarem objectes i noms de capes pel pdfmark i per pàgina
+}if
+
+
+%% segons els marges /mep posicionem el cub dins la pàgina
+zed
+{
+ ncub 1 sub
+ casellag mul mep add
+ mep translate
+}if
+
+
+%% executem la matriu tridimensional
+%(zzzz)pstack quit
+{  %% forall per tots els plans verticals
+
+ %% aquì podríem definir una lleixa per cada pla vertical del cub
+%%OC per cada pla vertical
+ FEMlleixes
+ {
+%%+ generador de capes
+%% crides pdfmark de configuració de capes
+%% les declarem i les hi donem nom literari
+  /araOLl ({objecteNodeLleixa) def
+  /araNLl (nomNodeLleixa) def
+  (}) araOLl dup length dup /araVa exch def string copy iL 6 string cvs dup length dup
+  /aCua exch def 1 add araVa add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa
+  exch putinterval dup 3 -1 roll araVa aCua add exch putinterval dup length string copy /araOLl exch def
+
+%(CAL?)pstack quit
+%        dup 1 get ARAupath exch 2 sub get  %% la X del node
+%        exch 0 get dup 3 1 roll  %% pel nom de la layer
+
+%%+ aquí és on creem la capa
+  mark /OC araOLl cvx exec /BDC pdfmark
+%        gsave 0 1 0 setrgbcolor faX grestore
+ }if  %%OC fem lleixes
+
+ dup 0 get
+
+ %% extraiem el punt 0,0 per moure la lleixa de les lletres al pla corresponent
+ dup 0 2 getinterval 3 1 roll
+
+ gsave
+
+ iS  %% refusem fer servir cap escalat
+ {  %% igualem les mides dels 2 eixos?
+%  1 1.2 scale  %% càcul a ull, però s'ha de fer ben fet
+ }if
+
+ [  %% posem en perspectiva l'eix X a /geixos (30 graus?)
+  1
+
+  Ti
+% geixos sin geixos cos div  %% valor de la tangent de l'angle /geixos (30ª) per l'eix X de la isomètrica
+%  0  %% test
+
+  0 1 0 0
+ ] concat
+
+ %% test que ens marca el filet del pla vertical
+ gsave
+ gsave
+ dup 1 setlinewidth 1 0 0 setrgbcolor
+ %% perfilem les lleixes?
+ %% rectifiquem la Y per igualar els dos costats per la distorsió de la perspectiva
+ aload pop pop hY rectstroke
+ grestore
+ %% tapem o no les lleixes verticals?
+ %pop
+ %% rectifiquem la Y per igualar els dos costats per la distorsió de la perspectiva
+ aload pop pop hY
+ 1 1 1 setrgbcolor rectfill
+ grestore
+
+ 1 get
+
+ %% movem la lleixa de les lletres al seu pla
+ exch aload pop translate
+
+%(!)pstack quit
+%dup length 20 sub 20 getinterval (AESCRIURE)pstack quit
+
+ cvx exec  %% executem l'string com a proc dels glifs
+
+ grestore
+
+%exit  %% test per si només volem veure la primera lleixa
+
+%%OC per cada pla vertical
+ FEMlleixes
+ {
+%%+ aquí és on tanquem la capa
+  mark /EMC pdfmark
+
+%%+ generador de capes
+%% crides pdfmark de configuració de capes
+%% les declarem i les hi donem nom literari
+%%+ aquí podem diferir el farcit a string i desar-ho dins una array de 2 elements (ens interessa per facilitar la categorització)
+%BlueO 64 string cvs dup length /araVa exch def exch 64 string cvs dup length araVa add 3 add string dup
+%4 -1 roll 0 exch putinterval dup araVa ( / ) putinterval dup 3 -1 roll araVa 3 add exch putinterval
+%dup length string copy
+
+  (que indica?)  %% no sabem perquè serveix?
+
+  [
+   exch
+   iL  % BlueO
+   exch
+  ]
+  /nomLleixa exch def
+%%+ generador de capes
+%% desem 
+  lleiXes araOLl
+  [
+   nomLleixa
+   %% definim el nom intern de la lleixa
+   araNLl dup length dup /araVa exch def string copy iL 6 string cvs dup length araVa add string dup
+   4 -1 roll 0 exch putinterval dup 3 -1 roll araVa exch putinterval cvn
+   %% flag del node que NO balla
+   true  % BVoOB
+   {  %% si és BlueValues
+    0
+   }
+   {  %% si és OtherBlues
+    2
+   }ifelse
+  ] put
+
+  iL 1 add /iL exch def
+
+ }if  %%OC tanquem la capa
+
+}forall  %% per tots els plans verticals
+
+
+%%OC cua
+FEMlleixes
+{
+%%+ arbre estructural de les capes
+%%+ creem els objectes per l'OptionalContent
+ lleiXes
+ {
+  pop mark /_objdef 3 -1 roll 128 string cvs cvx exec /type/dict /OBJ pdfmark
+ }forall
+
+ lleiXes
+ {  %% forall
+  exch mark exch 128 string cvs cvx exec
+  <<
+    /Type /OCG
+%%+ aquí definim el nom literari (solapa) de la lleixa muntant l'string amb el (Y del Blue / Y del node)
+    /Name 7 -1 roll dup 0 get
+    dup length 2 eq
+    {  %% és un node
+     exch pop aload pop exch 64 string cvs dup length /araVa exch def exch 64 string cvs dup
+     length araVa add 3 add string dup 4 -1 roll 0 exch putinterval dup araVa ( / ) putinterval
+     dup 3 -1 roll araVa 3 add exch putinterval dup length string copy
+    }
+    {  %% és una zona BlueValues o OtherBlues
+     0 get 64 string cvs dup length /araVa exch def exch 2 get 4 eq
+     {
+      ( > BlueValue) dup length araVa add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     }
+     {
+      ( > OtherBlue) dup length araVa add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     }ifelse
+    }ifelse
+  >> /PUT pdfmark
+ }forall
+
+ %% configurem el seu comportament (ordre, visibilitat, impressió, etc)
+
+%%+ alimentem l'array objGlif sempre amb nom diferent
+ /araOG ({objGlif) def
+ (}) araOG dup length dup /araVa exch def string copy
+ %iOG
+ iL
+ 6 string cvs dup length dup
+ /aCua exch def 1 add araVa add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa
+ exch putinterval dup 3 -1 roll araVa aCua add exch putinterval dup length string copy /araOG exch def
+
+ mark /_objdef araOG cvx exec /type/array /OBJ pdfmark  %% l'objecte array es crea per cada glif a afegir a {objOrder}
+
+ mark araOG cvx exec
+ %GLiF
+ (APAquinaCAPA)
+ 128 string cvs dup length dup /araVa exch def 4 add dup /araVa2 exch def
+ %ffile
+ glif 128 string cvs
+ length add
+ dup /araVa3 exch def 1 add string dup 3 -1 roll 0 exch putinterval dup araVa (   {) putinterval dup araVa2
+ % ffile
+ glif 128 string cvs
+ putinterval
+ dup araVa3 (}) putinterval /APPEND pdfmark  %% afegim el nom del glif i del fitxer de la font a l'objecte array
+
+ mark araOG cvx exec
+ [
+  (Y BlueValues:)
+  %% primer anem a pescar les zones
+  lleiXes
+  {
+   2 get 4 eq
+   {
+    128 string cvs cvx exec
+   }
+   {
+    pop
+   }ifelse
+  }forall
+  [
+   (Y Nodes:)
+   %% anem a pescar els nodes dels BlueValues
+   lleiXes
+   {
+    dup 2 get 0 eq
+    {
+     pop 128 string cvs cvx exec
+    }
+    {
+     2 get 1 eq
+     {
+      128 string cvs cvx exec
+     }
+     {
+      pop
+     }ifelse
+    }ifelse
+   }forall
+  ]
+ ] /APPEND pdfmark  %% afegim els BlueValues amb els seus Y nodes a l'objecte array
+
+%%+ alimentem l'array objOrder
+ mark {objOrder} araOG cvx exec /APPEND pdfmark  %% afegim l'array {objGlif} a l'array {objOrder} 
+
+%%+ alimentem l'array objOCGs de forma que anem afegint els objectes a la cua 
+ lleiXes
+ {  %% els objectes de capa no tenen cap necessitat d'anar ordenats segons el glif/pagina corresponent
+  pop 128 string cvs cvx exec mark exch {objOCGs} exch /APPEND pdfmark
+ }forall
+
+ %% integració a la base de l'estructura de pàgina
+ mark {ThisPage}
+ <<
+   /Properties
+   <<
+     %% clau (nom intern de la lleixa) valor (objecte de la lleixa)
+     lleiXes
+     {
+      1 get exch 128 string cvs cvx exec
+     }forall
+   >>
+ >> /PUT pdfmark
+
+%%+ cal veure si aquí és on ens cal desar 1 COP els cobjectes de l'estructura de lleixes que aguanten l'arbre OCProperties
+%%+ només 1 COP al final
+%%+ alimentem el diccionari objD
+ mark {objD} << /Order {objOrder} >> /PUT pdfmark  %% afegim {objOrder} a {objD}
+
+%%+ només 1 COP al final
+%%+ alimentem el diccionari objOCProperties
+ mark {objOCProperties} << /OCGs {objOCGs} /D {objD} >> /PUT pdfmark
+
+%%+ només 1 COP al final
+%%+ finalment alimentem el diccionari Catalog
+ mark {Catalog} << /OCProperties {objOCProperties} >> /PUT pdfmark
+
+}if
+
+mark
+%% camps públics del Docinfo
+/Subject %(Turn one simple sheet of paper into a little awesome book)
+(generem dinàmicament l'icònic cub de Gerrit Noordzij)
+/Title
+(GerritNoordzijCub_#.pdf)
+/Author (copyleft 2023: Marcantoni Malagarriga-Picas <marcantoni@femfum.com>)
+/Keywords (PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij)
+/Creator (github | https://ja.cat/NoordzijCub)
+/DOCINFO pdfmark
+%% podríem generar un camp privat per desar-hi tots els paràmetres clau de les variables aleatòries que han fet el PDF
+
+showpage
+
