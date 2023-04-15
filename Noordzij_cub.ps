@@ -8,11 +8,14 @@
 %% a l'eix de les Z evoluciona el contrast, de davant a darrera (fugant cap el NO) de menys contrast a més contrast
 
 %% per clonar-ho hauríem de localitzar una tipografia que tingués aquests 3 eixos dinàmics (pes, serifa, contrast)
+%% quan traslladem el codi a JS/canvas, CSS, html ho tindrem més fàcil
 
 %% però tenim d'altres alternatives:
 %% AdobeSans (Serif) MM, sempre el mateix glif, X,Y: pes, Z: ample
 %% implementat: en un mateix pla, l'ample es manté i els pesos extrems són al UR (màxim pes) i al LL (mínim pes) 
-%% el pes a les columnes ara va de baix a dalt i l'ample va de més estret (primer pla) a més ample (pla final de fuga) 
+%% el pes a les columnes ara va de baix a dalt i l'ample va de més estret (primer pla) a més ample (pla final de fuga)
+%% les capes són opcionals i descriuen...
+%% podríem afegir una anotació sensible a cada glif per fer visible el valor de pes/ample que l'ha generat
 %% AdobeSans (Serif) MM, X: pes, Y: sèrie de /ncub glifsi (però mantenint el pes en vertical), Z: ample
 %% per implementar
 %% AdobeMinion, sempre el mateix glif, X: pes , Y: ample , Z: correcció òptica
@@ -58,7 +61,7 @@ Acmptdr
  ncub dup mul ncub mul 64 string cvs
 }
 {
- /e  %% /e  %% 101 decimal  %% (ei)
+ (e)  %% /e  %% 101 decimal  %% (ei)
 }ifelse
 /glif exch def
 
@@ -223,8 +226,14 @@ true setglobal  %% no sabem si és del tot imprescindible
 [  %% conté tants arrays com /ncub
 
 %%Ordena l'eix Z (fuga) del cub
-% 0 1 ncub 1 sub  %% comença amb els glifs més amples al davant (primer pla del cub)
+true
+{
  ncub 1 sub -1 0  %% comença amb els glifs més estrets al davant (primer pla del cub)
+}
+{
+ 0 1 ncub 1 sub  %% comença amb els glifs més amples al davant (primer pla del cub)
+}
+ifelse
 
  {  %% for per a cadascun dels amples (1 per pla)
   %% els amples (índex 1) només canvien 5 cops (un per cada pla) d'estreta a ample, del fons al primer pla
@@ -247,7 +256,9 @@ true setglobal  %% no sabem si és del tot imprescindible
      %% aquí hem de desar el darrer valor de l'ample per la següent columna
      dup 0 get saltXYeix sub /maxPES exch def
 
-%%Ordena els glifs de la columna, el més negre a dalt 
+%%Ordena els glifs de la columna, true: el de més pes a dalt | false: el de menys pes a dalt
+true
+{
   %% aquest loop capgira tots els elements trobats a la pila
   counttomark dup 1 gt
   {  %% capgirem sempre que hi hagi més d'un paquet
@@ -260,6 +271,7 @@ true setglobal  %% no sabem si és del tot imprescindible
   {
    pop exch pop /atura't 1 def
   } ifelse
+}if
 
     ]  %% tanquem columna
 
@@ -268,7 +280,9 @@ true setglobal  %% no sabem si és del tot imprescindible
    %% aquí hem de incialitzar cap valor?
    1450 /maxPES exch def
 
-%%Ordena les columnes, la més negre a la dreta del pla
+%%Ordena les columnes, true: la de més pes a la dreta del pla | false: la de menys a la dreta del pla
+true
+{
   %% aquest loop capgira tots els elements trobats a la pila
   counttomark dup 1 gt
   {  %% capgirem sempre que hi hagi més d'un paquet
@@ -281,6 +295,7 @@ true setglobal  %% no sabem si és del tot imprescindible
   {
    pop exch pop /atura't 1 def
   } ifelse
+}if
 
   ]  %% tanquem pla
  }for  %% per a cadascun dels amples (1 per pla)
@@ -588,6 +603,10 @@ definefont  %% fixem la font en memòria
       grestore
 
       exch 5 -1 roll YsaltCasella mul add
+
+%% aquí hi poden anar les Annots? corregim l'ordre de les coordenades per tal que la casella quadri amb el glif
+%gsave 1 0 0 setrgbcolor 0 setlinewidth 4 copy 3 -1 roll 4 -1 roll exch rectstroke grestore
+
       moveto pop pop
 
       Acmptdr
@@ -685,9 +704,10 @@ zed
  mep translate
 }if
 
+%% array on desarem els valors Z de les lleixes
+/Zlleixes ncub array def
 
 %% executem la matriu tridimensional
-%(zzzz)pstack quit
 {  %% forall per tots els plans verticals
 
  %% aquì podríem definir una lleixa per cada pla vertical del cub
@@ -734,14 +754,17 @@ zed
   0 1 0 0
  ] concat
 
- %% test que ens marca el filet del pla vertical
+%%TEST que ens marca el filet del pla vertical
  gsave
+false{
  gsave
  dup 1 setlinewidth 1 0 0 setrgbcolor
  %% perfilem les lleixes?
  %% rectifiquem la Y per igualar els dos costats per la distorsió de la perspectiva
  aload pop pop hY rectstroke
  grestore
+}if
+
  %% tapem o no les lleixes verticals?
  %pop
  %% rectifiquem la Y per igualar els dos costats per la distorsió de la perspectiva
@@ -806,6 +829,9 @@ zed
   iL 1 add /iL exch def
 
  }if  %%OC tanquem la capa
+
+%% ordenem el valor constant de Z
+Zlleixes Acolumna 0 get 1 get iL 1 sub exch put
 
 }forall  %% per tots els plans verticals
 
@@ -872,6 +898,8 @@ FEMlleixes
  dup araVa3 (}) putinterval /APPEND pdfmark  %% afegim el nom del glif i del fitxer de la font a l'objecte array
 
  mark araOG cvx exec
+
+%lleiXes {== ==}forall (----)== quit
  [
   (Y BlueValues:)
   %% primer anem a pescar les zones
@@ -904,7 +932,68 @@ FEMlleixes
      }ifelse
     }ifelse
    }forall
+
   ]
+
+
+%%TEST
+%Zlleixes
+%(zzzz)pstack quit
+cleartomark
+mark
+lleiXes
+{
+ pop 128 string cvs
+}forall
+%% endreça una seqüència numèrica o de text, existent a l'stack, de menys a més (operador ge) o de més a menys (operador le)
+%% a comptar des de la base de l'stack  
+{  %% loop mentre estiguin desordenats
+ counttomark 1 sub /iCul exch def
+ %% escombrat d'ordenació
+ iCul     
+ {  %% repeat 
+  iCul index /araCul exch def
+  iCul 1 sub index araCul ge  %% ordre d'endreça
+  {     
+   iCul 1 sub /iCul exch def
+  }          
+  {
+   iCul -1 roll
+   iCul 1 add 1 roll
+  }ifelse
+ }repeat
+ %% mirem si estan per ordre de menys a més (ge)
+ %% o de més a menys (le), començant pel cul de l'stack
+ /Ordenats true def 
+ counttomark 1 sub /iCul exch def
+ iCul
+ {  %% repeat
+  iCul index /araCul exch def
+  iCul 1 sub index araCul ge  %% ordre d'endreça
+  {
+   iCul 1 sub /iCul exch def
+  }
+  {
+   /Ordenats false def
+   exit
+  }ifelse
+ }repeat
+ Ordenats{exit}if
+}loop
+
+counttomark array astore
+(Àquí el Tíçòl·lot désplegablè)
+exch
+{
+% lleiXes exch get
+ cvx exec
+}forall
+
+%(zzzz)pstack quit
+%exch pop aload pop exch
+
+
+
  ] /APPEND pdfmark  %% afegim els BlueValues amb els seus Y nodes a l'objecte array
 
 %%+ alimentem l'array objOrder
@@ -946,13 +1035,13 @@ FEMlleixes
 
 mark
 %% camps públics del Docinfo
-/Subject %(Turn one simple sheet of paper into a little awesome book)
+/Subject
 (generem dinàmicament l'icònic cub de Gerrit Noordzij)
 /Title
 (GerritNoordzijCub_#.pdf)
 /Author (copyleft 2023: Marcantoni Malagarriga-Picas <marcantoni@femfum.com>)
-/Keywords (PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij)
-/Creator (github | https://ja.cat/NoordzijCub)
+/Keywords (PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij, https://ja.cat/NoordzijCub)
+/Creator (https://github.com/marcantonifemfum/CubNoordzij/blob/main/Noordzij_cub.ps)
 /DOCINFO pdfmark
 %% podríem generar un camp privat per desar-hi tots els paràmetres clau de les variables aleatòries que han fet el PDF
 
