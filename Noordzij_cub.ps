@@ -46,6 +46,8 @@
 %% el càlcul del format de pàgina hauria d'anar en funció del cos escollit
 %% o el cos hauria d'anar en funció del format de pàgina escollit
 
+%% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -f Noordzij_cub.ps
+
 %%Assaig del comptador per veure com creix la distribució dins el cub
 false
 /Acmptdr exch def
@@ -55,13 +57,13 @@ false
 /ncub exch def
 
 
-%% escollim un glif pel seu nom, pel seu decimal o una paraula dins una string?
+%% escollim un glif pel seu literal, pel seu decimal o una cadena de text?
 Acmptdr
 {
  ncub dup mul ncub mul 64 string cvs
 }
-{
- (e)  %% /e  %% 101 decimal  %% (ei)
+{ 
+ (e)  %% /e literal  %% 101 decimal  %% (ei) cadena de text
 }ifelse
 /glif exch def
 
@@ -226,7 +228,8 @@ true setglobal  %% no sabem si és del tot imprescindible
 [  %% conté tants arrays com /ncub
 
 %%Ordena l'eix Z (fuga) del cub
-true
+true /Ofuga exch def
+Ofuga
 {
  ncub 1 sub -1 0  %% comença amb els glifs més estrets al davant (primer pla del cub)
 }
@@ -381,6 +384,8 @@ Acmptdr
  ncub 1 sub -1 0  %% el cub fuga cap al NO (mestral) tal i com el va concebre Noordzij
  {  %% for que genera els valors de cadascun dels plans xy en un sentit de fuga
 
+  dup /iApla exch def  %% útil per etiquetar les lleixes?
+
 %%Hi pesquem l'índex de 4 a 0 de l'array de plans verticals pel grup de 5x5 glifs que pintaran el pla actual
   dup Ainstancies
   exch get
@@ -523,7 +528,7 @@ dup length array copy
 %%Haurem de generar un nom únic?
 /unaInstanciaDelAsansMM  %% literal per definir la instància concreta que generem
 %ii 64 string cvs cvn
-%ii 1 add /ii exch def
+ii 1 add /ii exch def
 
 %% aquí substituïm la crida original pel seu diccionari ja normalitzat a WinAnsi...
 AsansMMionari
@@ -604,8 +609,111 @@ definefont  %% fixem la font en memòria
 
       exch 5 -1 roll YsaltCasella mul add
 
-%% aquí hi poden anar les Annots? corregim l'ordre de les coordenades per tal que la casella quadri amb el glif
+%%TEST cap del posicionat net de cada glif en relació al punt 0,0 absolut
+%ii 1 eq  %% en fem només 1
+true  %% a tot
+{  %% cal posar ordre a les coordenades
+% gsave dup 0 2 getinterval dup == aload pop transform itransform == == grestore 
+% ii ==
+
+%% corregim l'ordre de les coordenades per tal que la casella quadri amb el glif
+4 copy 3 -1 roll 4 -1 roll exch
+%% com que no és format rectstroke li hem de donar format bbox
+2 index add exch 3 index add exch
+4 array astore
+
+%% fem un nom únic
+%%EP! hauríem de pescar els pesos i amples de cada lleixa en una array desada a banda dins la memòria global
+(Weight: ### Width: ### glif000) dup ii 64 string cvs dup length 3 exch sub 27 add exch putinterval /araTooltip exch def
+
+%%Constatem amb alegria que els articles obeeixen al mateix sistema de coordenades amb el que componem els glifs
+%% cosa que no fan d'altres objectes del pla interactiu de pdf, com les anotacions o els formularis (les descartem aquí)
+%% tenen en comú però que tampoc NO obeeixen els Optional Contents, o sigui que ignoren les capes
+%% amb l'avantatge de comptar amb una solapa pròpia de navegació ens permetrà localitzar els pesos clicant sobre el glif
+%% poser hauríem d'obrir el PDF amb aqusta la solapa activa més que amb le de les capes
+%% el viewer de PDF a Firefox: TÉ la solapa de capes i funciona, també podem veure la solapa d'articles però els links no van
+%% el viewer de PDF a Brave/Chrome: NO té la solapa de capes, té la solapa d'articles però els links no van
+[
+/Rect 3 -1 roll
+%dup ==
+/Title araTooltip
+/Page 1
+/ARTICLE
+pdfmark
+
+[
+/Action /Article
+/Dest araTooltip
+/Title araTooltip
+/OUT pdfmark
+
+
+false{
+%%Awidget
+%% aquí hi poden anar les Annots?
+[
+/_objdef
+({tooltipUNIC000}) dup ii 64 string cvs dup length 3 exch sub 12 add exch putinterval
+dup /araTooltip exch def cvx exec
+/type /dict
+/OBJ pdfmark
+%% si volem visibilitzar gràficament el rectangle
 %gsave 1 0 0 setrgbcolor 0 setlinewidth 4 copy 3 -1 roll 4 -1 roll exch rectstroke grestore
+%% caldrà veure si les anotacions també queden amagades sota la perspectiva de les capes
+%% corregim l'ordre de les coordenades per tal que la casella quadri amb el glif
+4 copy 3 -1 roll 4 -1 roll exch
+%% com que no és format rectstroke li hem de donar format bbox
+2 index add exch 3 index add exch
+4 array astore
+
+mark
+{tooltips}
+araTooltip cvx exec
+mark
+araTooltip cvx exec
+
+false
+{
+ <<
+   /Rect 8 -1 roll  % rectangle invisible i sensible del botó
+%(Y)pstack quit
+   /P {ThisPage}  % ref ind a l'entrada que hi ha d'haver al diccionari de la pàgina
+   /FT /Btn  % tipus botó
+   /T (BotoPostIt)  % nom intern pot ser ídem per tots?
+   /Ff 65536  % flag obligatori per al tipus botó
+   /Subtype /Widget  % obligatori
+   /Type /Annot  % obligatori
+   /TU (tampoc al GSoC!)  % text del Tooltip (Sticky Note o Post-It)
+ >>
+}
+{
+ <<
+   /Rect 8 -1 roll 
+   /P {ThisPage}
+   /FT /Btn
+   /T %(elMeuTooltip)
+araTooltip
+   /Ff 65536
+   /Subtype /Widget
+   /Type /Annot
+   /TU (Weight: 50 | Width: 1450)
+   /F 4
+   /AA <<>>
+   /MK <</IF <<>> >>
+   /H /N
+   /DA (/HeBo 18 Tf 0 g)
+ >>
+}ifelse
+
+/PUT
+pdfmark
+
+/APPEND
+pdfmark
+
+%%TEST cua
+}if
+}if
 
       moveto pop pop
 
@@ -693,6 +801,27 @@ FEMlleixes
 
 %%+ comprovarem si al generador de capes l'ordre dels factor no altera el producte
  /lleiXes 1 dict def  %% inicialitzem on desarem objectes i noms de capes pel pdfmark i per pàgina
+
+%%Awidget
+false{
+ %% estructura d'objectes de l'arbre Acroform que penja del Catalog per generar els tooltips amb els valors de cada glif
+ [ /_objdef {aform} /type /dict /OBJ pdfmark
+ [ /_objdef {afields} /type /array /OBJ pdfmark
+ [ {aform} << /Fields {afields}
+/DR <<
+%      /Font <</ZaDb 11 0 R /Helv 10 0 R /HeBo 38 0 R >>
+%      /Encoding <</PDFDocEncoding 12 0 R >>
+    >>
+/DA (/Helv 0 Tf 0 g )
+           >> /PUT pdfmark
+ [ {Catalog} << /AcroForm {aform} >> /PUT pdfmark
+ [ {afields} {tooltips} /APPEND pdfmark
+
+%% entrada /Annots com una array del diccionari /Page on hi ficarem tots els tooltips
+ [ /_objdef {tooltips} /type /array /OBJ pdfmark
+ [ {ThisPage} << /Annots {tooltips} >> /PUT pdfmark
+}if
+
 }if
 
 
@@ -701,7 +830,12 @@ zed
 {
  ncub 1 sub
  casellag mul mep add
- mep translate
+ mep
+
+%%TEST
+%2 copy 2 array astore ==
+
+ translate
 }if
 
 %% array on desarem els valors Z de les lleixes
@@ -800,7 +934,21 @@ false{
 %4 -1 roll 0 exch putinterval dup araVa ( / ) putinterval dup 3 -1 roll araVa 3 add exch putinterval
 %dup length string copy
 
-  (que indica?)  %% no sabem perquè serveix?
+%%EP! hauríem de pescar els amples de cada lleixa en una array desada a banda dins la memòria global
+%Apla iApla get 0 get 1 get  %% aquest no canvia mai
+Ofuga
+{
+ maxAMPLE iApla saltZeix mul sub cvi  %% comença amb els glifs més estrets al davant (primer pla del cub)
+}
+{
+ minAMPLE iApla saltZeix mul add cvi  %% comença amb els glifs més amples al davant (primer pla del cub)
+}ifelse
+%(LLLL)pstack quit
+%(###)  %% valor genèric provisional
+zeix 128 string cvs dup length dup /ARAva exch def
+2 index 128 string cvs length add 1 add string dup 3 -1 roll 0 exch putinterval
+dup ARAva ( ) putinterval dup 3 -1 roll 128 string cvs ARAva 1 add exch putinterval
+iApla 1 add /iApla exch def  %% si canviessim la fuga (ara al NO) això s'invalida!
 
   [
    exch
@@ -886,7 +1034,7 @@ FEMlleixes
 
  mark araOG cvx exec
  %GLiF
- (APAquinaCAPA)
+ (Cub de Noordzij)
  128 string cvs dup length dup /araVa exch def 4 add dup /araVa2 exch def
  %ffile
  glif 128 string cvs
@@ -895,7 +1043,8 @@ FEMlleixes
  % ffile
  glif 128 string cvs
  putinterval
- dup araVa3 (}) putinterval /APPEND pdfmark  %% afegim el nom del glif i del fitxer de la font a l'objecte array
+ dup araVa3 (}) putinterval
+ /APPEND pdfmark  %% afegim el nom del glif i del fitxer de la font a l'objecte array
 
  mark araOG cvx exec
 
@@ -982,17 +1131,15 @@ lleiXes
 }loop
 
 counttomark array astore
-(Àquí el Tíçòl·lot désplegablè)
+
+(lleixes verticals)
 exch
 {
 % lleiXes exch get
  cvx exec
 }forall
 
-%(zzzz)pstack quit
 %exch pop aload pop exch
-
-
 
  ] /APPEND pdfmark  %% afegim els BlueValues amb els seus Y nodes a l'objecte array
 
