@@ -38,22 +38,22 @@
 %% per les limitacions actuals del intèrpret GS, treballem amb tipografies MM
 %% escollim un glif
 %% generem n graelles de nxn glifs (el cub de Noordzij n val 5)
-%% en el pla x,y les caselles s'ordenen de dalt a baix i d'esquerra a dreta
+%% en el pla x,y les caselles s'ordenen de dalt a baix i d'esquerra a dreta (o a l'inrevés)
 %% a l'eix 2D x,y treballem amb 1 eix dinàmic (p.e. pes o ample)
 %% en el pla z les caselles s'ordenen de dreta a esquerra (fuga cap a l'esquerra)
-%% a l'eix 3D z treballem amb 1 eix dinàmic (p.e. contrast del ductus o color)
-%% cadascun dels plans 3D hauria d'estar en una lleixa
+%% a l'eix 3D z treballem amb 1 eix dinàmic (p.e. ample, contrast del ductus o color)
+%% cadascun dels plans 3D verticals hauria d'estar en una lleixa
 %% el càlcul del format de pàgina hauria d'anar en funció del cos escollit
 %% o el cos hauria d'anar en funció del format de pàgina escollit
 
 %% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -f Noordzij_cub.ps
 
 %%Assaig del comptador per veure com creix la distribució dins el cub
-true
+false
 /Acmptdr exch def
 %%CUBescriu marcarem els punts on fem ús de l'espai del cub com una manera d'escriure paraules
 %% /Acmptdr també ha de ser a true
-true
+false
 /CUBescriu exch def
 (ratassia)  %% paraula que escriurem al cub i el seu nombre de caràcters fixarà el valor del costat
 /txtcub exch def
@@ -63,7 +63,7 @@ CUBescriu Acmptdr and
  txtcub length
 }
 {  %% escollim el nombre de glifs, ídem pels 3 costats xyz del cub
- 3  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+ 5  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
 }ifelse
 /ncub exch def
 
@@ -127,7 +127,7 @@ Acmptdr
   64 string cvs
  }ifelse
 }
-{ 
+{  %% glif o conjunt a compondre dins el cub 
  (e)  %% /e literal  %% 101 decimal  %% (ei) cadena de text
 }ifelse
 /glif exch def
@@ -184,8 +184,8 @@ true
 
 %% escollim la tipografia MM
 (/Users/femfum/MultipleMaster/AdobeSans_AdobeSerif/ZX______.PFB)  %% Terminal
-%% ()  %% localhost MacBookAir
-%% ()  %% servidor Teixidora
+%% (/Library/WebServer/Documents/www.pliegos.net/maker/GerritNoordzij/ZX______.PFB)  %% localhost MacBookAir
+%% (/var/www/wordpress/maker/GerritNoordzij/ZX______.PFB)  %% servidor Teixidora
 /tipusMM exch def
 
 
@@ -1259,7 +1259,7 @@ mark
 /Subject
 (generem dinàmicament l'icònic cub de Gerrit Noordzij)
 /Title
-(GerritNoordzijCub_#.pdf)
+(l'icònic cub de Gerrit Noordzij)
 /Author (copyleft 2023: Marcantoni Malagarriga-Picas <marcantoni@femfum.com>)
 /Keywords (PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij, https://ja.cat/NoordzijCub)
 /Creator (https://github.com/marcantonifemfum/CubNoordzij/blob/main/Noordzij_cub.ps)
