@@ -49,18 +49,83 @@
 %% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -f Noordzij_cub.ps
 
 %%Assaig del comptador per veure com creix la distribució dins el cub
-false
+true
 /Acmptdr exch def
+%%CUBescriu marcarem els punts on fem ús de l'espai del cub com una manera d'escriure paraules
+%% /Acmptdr també ha de ser a true
+true
+/CUBescriu exch def
+(ratassia)  %% paraula que escriurem al cub i el seu nombre de caràcters fixarà el valor del costat
+/txtcub exch def
 
-%% escollim el nombre de glifs, ídem pels 3 costats xyz del cub
-5  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+CUBescriu Acmptdr and
+{
+ txtcub length
+}
+{  %% escollim el nombre de glifs, ídem pels 3 costats xyz del cub
+ 3  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+}ifelse
 /ncub exch def
 
 
 %% escollim un glif pel seu literal, pel seu decimal o una cadena de text?
 Acmptdr
 {
- ncub dup mul ncub mul 64 string cvs
+ ncub dup mul ncub mul
+%%CUBescriu marcarem els punts on fem ús de l'espai del cub com una manera d'escriure paraules
+ CUBescriu
+ {
+  %% farcim la cadena on quedaran indexats els glifs que formen la paraula /txtcub per compondre i llegir el cub 3D
+  string /txt3Dcub exch def
+  /i3Dcub 0 def  %% índex dels glifs a ficar dins /txt3Dcub
+  /itxtcub 0 def  %% índex dels glifs a compondre dins /txtcub
+  %% escrivint de /txtcub en fuga a Z:
+  %% no caldria aquesta nina russa de repeats, doncs amb un for fent salts de length de /txtcub dins /txt3Dcub n'hi hauria prou
+%%Ordena de com s'escriu la paraula que hem definit a /txtcub (EP! ara només treballa a 1 octet)
+  false
+  {
+   %% compon el text de manera que, a cada lleixa, componem /txtcub en columna de baix a dalt
+   ncub
+   {  %% Z
+    ncub
+    {  %% X
+     ncub
+     {  %% Y
+      i3Dcub dup
+      %% primer extraiem el decimal de /txtcub amb l'índex itxtcub
+      txtcub itxtcub get
+      %% incrustem el decimal a l'índex /i3Dcub dins /txt3Dcub
+      txt3Dcub 3 1 roll put
+      1 add /i3Dcub exch def
+      itxtcub 1 add dup ncub eq
+      {  %% inicialitzem l'índex que extrau el glif a compondre
+       pop /itxtcub 0 def
+      }
+      {
+       /itxtcub exch def
+      }ifelse
+     }repeat
+    }repeat
+   }repeat
+  }
+  {  %% compon el text de manera que, a cada lleixa, omplim d'1 sola lletra del mot de /txtcub perquè és llegeixi en fuga Z
+   /saltLleixa 0 def
+   0 1 ncub 1 sub
+   {  %% per cada lleixa
+    txtcub exch get /araGlif exch def  %% el decimal del glif a repetir per tota la lleixa
+    0 1 ncub dup mul 1 sub
+    {  %% per tota la lleixa
+     saltLleixa add txt3Dcub exch araGlif put
+    }for
+    saltLleixa ncub dup mul add /saltLleixa exch def
+   }for
+  }ifelse
+%%CUBescriu manualment hi posem el glif que ens sembla que té una mètrica més ample (com ho automatitzarem?)
+  (a)
+ }
+ {
+  64 string cvs
+ }ifelse
 }
 { 
  (e)  %% /e literal  %% 101 decimal  %% (ei) cadena de text
@@ -118,7 +183,9 @@ true
 
 
 %% escollim la tipografia MM
-(/Users/femfum/MultipleMaster/AdobeSans_AdobeSerif/ZX______.PFB)
+(/Users/femfum/MultipleMaster/AdobeSans_AdobeSerif/ZX______.PFB)  %% Terminal
+%% ()  %% localhost MacBookAir
+%% ()  %% servidor Teixidora
 /tipusMM exch def
 
 
@@ -284,7 +351,7 @@ true
    1450 /maxPES exch def
 
 %%Ordena les columnes, true: la de més pes a la dreta del pla | false: la de menys a la dreta del pla
-true
+false
 {
   %% aquest loop capgira tots els elements trobats a la pila
   counttomark dup 1 gt
@@ -371,7 +438,7 @@ true
 /iS exch def  %% imprescindible a true si volem emular el cub de Norrdzij
 
 
-%% comptador per avauar l'ordre d'escriptura dels glifs
+%% comptador per avaluar l'ordre d'escriptura dels glifs
 Acmptdr
 {
  /ioe 0 def
@@ -719,7 +786,14 @@ pdfmark
 
       Acmptdr
       {  %% escriu el nombre del comptador
-       ioe 64 string cvs ioe 1 add /ioe exch def
+       CUBescriu
+       {  %% extraiem el glif que toca compondre 
+        txt3Dcub ioe 1 getinterval
+        ioe 1 add /ioe exch def
+       }
+       {
+        ioe 64 string cvs ioe 1 add /ioe exch def
+       }ifelse
       }
       {  %% escriu el glif
        glif
