@@ -80,6 +80,11 @@ CUBescriu Acmptdr and
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 }ifelse
+%% filtrem que no hi hagi un valor més enllà de 15 glifs pel costat del cub
+dup 15 gt
+{
+ pop 15  %% ho deixem amb quinze?
+}if
 /ncub exch def
 
 %% escollim un glif pel seu literal, pel seu decimal o una cadena de text?
@@ -1716,7 +1721,7 @@ mark
 /Title
 (l'icònic cub de Gerrit Noordzij)
 /Author (copyleft 2023: Marcantoni Malagarriga-Picas <marcantoni@femfum.com>)
-/Keywords (PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij, https://ja.cat/NoordzijCub)
+/Keywords (PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij, https://ja.cat/NoordzijCub, https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=é)
 /Creator (https://github.com/marcantonifemfum/CubNoordzij/blob/main/Noordzij_cub.ps)
 /DOCINFO pdfmark
 %% podríem generar un camp privat per desar-hi tots els paràmetres clau de les variables aleatòries que han fet el PDF
