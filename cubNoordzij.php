@@ -39,56 +39,40 @@ echo "
 if ($_SERVER['REQUEST_METHOD'] === 'GET')
 {  // Si fem GET: passem el valor de les variables dins la mateixa URL
 
+//ATENCIÓ: les variables NO poden començar mai amb un numèric!
+
  // esborrem les anteriors per si les mosques?
- putenv('vp=');
- putenv('nUp=');
- putenv('hv=');
- putenv('full=');
- putenv('r=');
- putenv('labal=');
- putenv('tlab=');
-//SNRD inicialitzem la galeta/variable de l'hora del client
- putenv('MRCT_qhe=');
+ putenv('xyz=');
+ putenv('glif=');
+ putenv('cos=');
+// putenv('full=');
 
  // crida sense paràmetres per l'execució única del prototip dinàmic del cub de Noordzij
  // http://localhost/www.pliegos.net/maker/GerritNoordzij/cubNoordzij.php
- $vp=$_GET['vp'];
-//echo($vp.'<br>');
- $nup=$_GET['nUp'];
-//echo($nup.'<br>');
- $hv=$_GET['hv'];
-//echo($hv.'<br>');
- $full=$_GET['full'];
+ $xyz=$_GET['xyz'];
+//echo($xyz.'<br>');
+ $glif=$_GET['glif'];
+//echo($glif.'<br>');
+ $cos=$_GET['cos'];
+//echo($cos.'<br>');
+// $full=$_GET['full'];
 //echo($full.'<br>');
- $r=$_GET['r'];
-//echo($r.'<br>');
- $labal=$_GET['labal'];
-//echo($lab.'<br>');
- $tlab=$_GET['tlab'];
 //exit(' ...em veus?');
 }
 else
 {  // Si fem POST: les variables vindran triades des d'index_##.php
 
- $vp=$_POST['vp'];
+ $xyz=$_POST['xyz'];
  //echo $vp;  // ensenyem vores de les pàgines?
 
- $nup=$_POST['nUp'];
+ $glif=$_POST['glif'];
  //echo $nup;  // nUp
 
- $hv=$_POST['hv'];
+ $cos=$_POST['cos'];
  //echo $hv;  // orientació
 
- $full=$_POST['full'];
+// $full=$_POST['full'];
  //echo $full;  // full d'impressió
-
- $r=$_POST['r'];
- //echo $r;  // mantenim la ràtio?
-
- $labal=$_POST['labal'];
- //echo $labal;  // algorisme
- $tlab=$_POST['tlab'];
-// echo $tlab;  // text de la caixa
 // echo $_POST['tlab'];  // text a compondre
 // exit(' ...bon dia!');
 }
@@ -97,13 +81,10 @@ else
 // de manera que, un cop capturades les variables de la URL, en fem un putenv de cadascuna, per després
 // llegir-les de dins el .ps a través de l'operador getenv del GS 
 
-putenv("MRCT_vp=$vp");  // desem si ensenyem les vores de les pàgines a la variable d'entorn 
-putenv("MRCT_nup=$nup");  // desem l'nup a la variable d'entorn 
-putenv("MRCT_hv=$hv");  // desem l'orientació a la variable d'entorn 
-putenv("MRCT_full=$full");  // desem el format del full d'impressió a la variable d'entorn 
-putenv("MRCT_r=$r");  // desem si mantenim la ràtio a la variable d'entorn 
-putenv("MRCT_labal=$labal");  // desem l'algorisme de composició a la variable d'entorn 
-putenv("MRCT_tlab=$tlab");  // desem el text a compondre a la variable d'entorn 
+putenv("MRCT_xyz=$xyz");  // desem si ensenyem les vores de les pàgines a la variable d'entorn 
+putenv("MRCT_glif=$glif");  // desem l'nup a la variable d'entorn 
+putenv("MRCT_cos=$cos");  // desem l'orientació a la variable d'entorn 
+//putenv("MRCT_full=$full");  // desem el format del full d'impressió a la variable d'entorn 
 
 // treballem amb l'hora del client i no pas amb la del servidor
 //SNRD
