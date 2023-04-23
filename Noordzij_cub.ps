@@ -80,6 +80,7 @@ CUBescriu Acmptdr and
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 }ifelse
+
 %% filtrem que no hi hagi un valor més enllà de 15 glifs pel costat del cub
 dup 15 gt
 {
@@ -622,10 +623,14 @@ glif type
   24  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
-}ifelse
 %% escollim un cos
+dup 200 gt
+{  %% filtrem a un màxim de cos
+ pop 200
+}if
 /cosglif exch def
 
+%(OOO-OOO)pstack exit
 
 %% escollim el format de pàgina
 595 842  %% ample, alt
