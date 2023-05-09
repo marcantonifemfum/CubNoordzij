@@ -15,11 +15,11 @@ l'intèrpret:
 
 Genera dinàmicament via URL el cub de Noordzij clàssic en format PDF, amb tres paràmetres variables:
 
-# l'element constructor: un glif o paraula: AdobeSansMM té 235 glifs si via xifrat o via nom, no se'l localtza, l'algorisme escriurà ##
+\# l'element constructor: un glif o paraula: AdobeSansMM té 235 glifs si via xifrat o via nom, no se'l localtza, l'algorisme escriurà ##
 
-# instàncies (nombre d'elements constructors del costat del cub): de 1 fins a 15
+\# instàncies (nombre d'elements constructors del costat del cub): de 1 fins a 15
 
-# el cos de la tipografia: de # fins a 200 pt (el format de pàgina ve condicionat pel cos)
+\# el cos de la tipografia: de # fins a 200 pt (el format de pàgina ve condicionat pel cos)
 
 Treballem de forma fixa dins la perspectiva isomètrica (xyz a 120° fugant al NO) que Gerrit Noordzij va glorificar a la portada de
 
@@ -33,14 +33,14 @@ L'ordre de creixement de l'eix Z de l'ample (/Width) és: el mínim a la lleixa 
 
 	COM HO FEM ANAR?
 									
-										>> text normal <<
-	https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=é
-										>> codi hexadecimal <<
-	https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=%E9
-										>> nom del glif <<
-	https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=/eacute
-										>> amb el codi decimal <<
-	https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=233
+>> text normal <<
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=é
+>> codi hexadecimal <<
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=%E9
+>> nom del glif <<
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=/eacute
+>> amb el codi decimal <<
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=233
 
 
 https://ja.cat/NoordzijCub
