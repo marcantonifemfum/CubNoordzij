@@ -1,11 +1,16 @@
 %!
-%% fem el cub de Gerrit Noordzij: un cub isomètric, fugant a mestral (NO) construït amb 5 plans quadrats de 5x5 glifs per pla
-%% observant el cub original a la portada del llibre «De streek Theorie van het schrift»
-%% https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg
-%% podem veure que el tipus utilitzat treballa en 3 eixos dinàmics:
+%%
+%% https://github.com/marcantonifemfum/CubNoordzij/blob/main/LICENSE
+
+%% Fem el cub dinàmic de Gerrit Noordzij, per defecte, en el seu estat inicial: un cub isomètric, fugant a mestral (NO)
+%% construït amb 5 plans quadrats de 5x5 glifs per pla, tal i com observem en el cub original a la portada del llibre
+%% «De streek Theorie van het schrift» https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg
+%% Noordzij fa treballar les instàncies de la tipografia en 3 eixos dinàmics:
 %% a l'eix de les X evoluciona el pes, d'esquerra a dreta, de fina a negreta
 %% a l'eix de les y evoluciona la serifa, de dalt a baix, de punxa a escapçat
 %% a l'eix de les Z evoluciona el contrast, de davant a darrera (fugant cap el NO) de menys contrast a més contrast
+
+%% Nosaltres fem
 
 %% per clonar-ho hauríem de localitzar una tipografia que tingués aquests 3 eixos dinàmics (pes, serifa, contrast)
 %% quan traslladem el codi a JS/canvas, CSS, html ho tindrem més fàcil
@@ -46,23 +51,30 @@
 %% el càlcul del format de pàgina hauria d'anar en funció del cos escollit
 %% o el cos hauria d'anar en funció del format de pàgina escollit
 
-%% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -f Noordzij_cub.ps
+%% a la línia de comanda és fonamental activar el flag -dPDFSETTINGS=/prepress perquè no ens alteri la font!
+%% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -f Noordzij_cub.ps
 
 %%Assaig del comptador per veure com creix la distribució dins el cub
 false
 /Acmptdr exch def
 %%CUBescriu marcarem els punts on fem ús de l'espai del cub com una manera d'escriure paraules
-%% /Acmptdr també ha de ser a true
+%% /Acmptdr també ha de ser a true!
 false
 /CUBescriu exch def
-(ratassia)  %% paraula que escriurem al cub i el seu nombre de caràcters fixarà el valor del costat
+(Lletraferits)  %% paraula que escriurem al cub i el seu nombre de caràcters fixarà el valor del costat
 /txtcub exch def
+
+%% definim el glif de substitució quan no el localitzem per nom o per codi
+/.notdef (#) def
+
+systemdict /EncodingDirectory get /WinAnsiEncoding get dup length array copy
+/xifrat exch def  %% el desem com una array modificable si ens cal personalitzar glifs fora del WinAnsi
 
 CUBescriu Acmptdr and
 {
  txtcub length
 }
-{  %% escollim el nombre de glifs, ídem pels 3 costats xyz del cub
+{  %% escollim el nombre de glifs (instàncies) ídem pels 3 costats xyz del cub
 %%MenuGET &xyz= capturem la variable via URL?
  %% capturem la variable d'entorn generada amb PHP com a PHP2PS2PHPgeneracioicapturadunavariabledentorn.php
  (MRCT_xyz) getenv  %% la variable d'entorn existeix?
@@ -76,24 +88,30 @@ CUBescriu Acmptdr and
   }ifelse
  }
  {  %% la variable d'entorn NO existeix perquè executem l'applet en local via Terminal per línia de comanda
-  5  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+  100  %% valors enters, de 2 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 }ifelse
-
-%% filtrem que no hi hagi un valor més enllà de 15 glifs pel costat del cub
-dup 15 gt
+%% filtrem que no hi hagi un valor per sota de 2 i més enllà de 12 glifs pel costat del cub (instàncies Z)
+dup 12 gt
 {
- pop 15  %% ho deixem amb quinze?
-}if
+ pop 12  %% ho deixem amb dotze?
+}
+{
+ dup 2 lt
+ {  %% com a mínim 2 glifs de costat
+  pop 2
+ }if
+}ifelse
+dup /nDocInfo exch def
 /ncub exch def
 
 %% escollim un glif pel seu literal, pel seu decimal o una cadena de text?
-Acmptdr
+Acmptdr  %% fem l'assaig del comptador per veure com creix la distribució dins el cub?
 {
  ncub dup mul ncub mul
 %%CUBescriu marcarem els punts on fem ús de l'espai del cub com una manera d'escriure paraules
- CUBescriu
+ CUBescriu  %% permet escriure una paraula amb el mateix nombre de caràcters que de lleixes per tal es pugui llegir dins el cub
  {
   %% farcim la cadena on quedaran indexats els glifs que formen la paraula /txtcub per compondre i llegir el cub 3D
   string /txt3Dcub exch def
@@ -141,7 +159,7 @@ Acmptdr
    }for
   }ifelse
 %%CUBescriu manualment hi posem el glif que ens sembla que té una mètrica més ample (com ho automatitzarem?)
-  (a)
+  (L)
  }
  {
   64 string cvs
@@ -157,7 +175,7 @@ Acmptdr
    pop (e)  %% valor per defecte original del cub de Noordzij
   }
   {  %% té dades perquè executem via URL amb index_##.php (mètode $_POST) o amb cubNoordzij.php amb paràmetres (mètode $_GET)
-   {
+   {  %% què passa quan és el nom reservat d'un operador, p.e. showpage ?
     dup cvx exec  %% executem l'string per saber si és una cadena de text (pot ser també un nom o un decimal)
    }stopped
    {  %% és una cadena de text
@@ -568,25 +586,53 @@ exch pop  %% ens carreguem mark
   }ifelse
  }
  {  %% la variable d'entorn NO existeix perquè executem l'applet en local via Terminal per línia de comanda
-  (e)  %% /e literal  %% 101 decimal  %% (ei) cadena de text
+  %% aquí ens cal escriure d'una d'aquestes tres maneres:
+/periodcentered   %% /e literal  %% 101 decimal  %% (ei) cadena de text, però ara hi tenim un escapçador al primer glif!
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 
 }ifelse
+dup /gDocInfo exch def
 /glif exch def
 
-%% el tractem com el tractem, sempre l'acabem convertint en una string
-glif type
+/ESaCharStrings? false def  %% gatell per saber si hem de cercar el literal dins els glifs definits a la font de treball
 
-%(<<<)pstack exit
- /integertype eq
-{
- 1 string dup 0 glif put /glif exch def
+%% el tractem com el tractem, sempre l'acabem convertint en una string
+glif type /integertype eq
+{  %% enter decimal que li cerquem el literal equivalent
+ glif 32 le
+ {  %% si és un espai en blanc o per sota del seu codi
+  /glif /.notdef def  %% activarem el caràcter desconegut que hem definit abans
+ }
+ {
+  glif 256 ge
+  {  %% un codi en doble octet més enllà del 255
+   systemdict /AdobeGlyphList get
+   {  %% forall
+    glif eq
+    {
+     /glif exch def  %% passem d'un enter decimal a un literal
+     /ESaCharStrings? true def  %% cercarem dins /cionari
+     exit
+    }
+    {
+     pop
+    }ifelse
+   }forall
+   glif type /integertype eq
+   {  %% però si encara no hem trobat a quin literal equival
+    /glif /.notdef def  %% activarem el caràcter desconegut que hem definit abans
+   }if
+  }
+  {
+   1 string dup 0 glif put /glif exch def
+  }ifelse
+ }ifelse
 }
 {
  glif type /nametype eq
  {
-  systemdict /EncodingDirectory get /WinAnsiEncoding get /xifrat exch def
+%  systemdict /EncodingDirectory get /WinAnsiEncoding get /xifrat exch def
   xifrat length 1 sub 0 exch 1 exch
   {
    dup xifrat exch get glif eq
@@ -599,11 +645,19 @@ glif type
   }for
   glif type /nametype eq
   {
-   (\n\n >>> no hem trobat el glif, pleguem!\n\n)print flush quit
+   /ESaCharStrings? true def
+%% ho deixem per més endavant
+%%   (\n\n >>> no hem trobat el glif, pleguem!\n\n)print flush quit
   }if
  }
  {  %% stringtype
-
+  Acmptdr not
+  {  %% tret que fem anar el comptador de glifs o el componedor /CUBescriu
+   glif length 1 gt
+   {  %% escapcem al primer glif si en duu més d'un
+    glif 0 1 getinterval /glif exch def
+   }if
+  }if
  }ifelse
 }ifelse
 
@@ -620,22 +674,27 @@ glif type
   }ifelse
  }  
  {  %% la variable d'entorn NO existeix perquè executem l'applet en local via Terminal per línia de comanda
-  24  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+  0  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 %% escollim un cos
 dup 200 gt
 {  %% filtrem a un màxim de cos
  pop 200
-}if
+}
+{  %% i ha un mínim
+ dup 2 lt
+ {
+  pop 2
+ }if
+}ifelse
+dup /cDocInfo exch def
 /cosglif exch def
 
-%(OOO-OOO)pstack exit
-
+%% ara no actua
 %% escollim el format de pàgina
 595 842  %% ample, alt
 2 array astore /fPagina exch def
-
 
 %% el format de pàgina en funció del cos (true) o el cos en funció del format de pàgina (false)
 true
@@ -643,16 +702,112 @@ true
 
 
 %% activem les lleixes? %%OC Optional Content
-true
+true  %% a banda també activa/desactiva la solapa d'articles glif a glif
 /FEMlleixes exch def
 
 
-%% escollim la tipografia MM
-%(/Users/femfum/MultipleMaster/AdobeSans_AdobeSerif/ZX______.PFB)  %% Terminal
-(/Library/WebServer/Documents/www.pliegos.net/maker/GerritNoordzij/ZX______.PFB)  %% localhost MacBookAir
+%% mapa d'índex de visibilitat dels glifs quan el cub és muntat (totes les lleixes actives) i que indiquen a
+%%GlifVisible quan hi ha de posar el signe ! que veiem a la solapa d'Articles i que indica que el glif és visible
+ncub dup dup mul mul array /aVisibles exch def
+0 1 aVisibles length 1 sub
+{  %% posem a false (no visibles) tots els elements
+ aVisibles exch false put
+}for
+
+0 1 ncub 1 sub
+{  %% for
+ dup ncub 1 sub eq
+ {  %% posa a true (visibles) tots els equidistants a la distància X ncub i a la Z ncub x ncub
+  dup
+  ncub
+  {
+   dup aVisibles exch true put
+   ncub dup mul add
+  }repeat
+  pop
+  ncub add ncub dup dup mul 1 sub   
+  {
+   ncub
+   {
+    dup aVisibles exch true put
+    ncub dup mul add
+   }repeat
+   pop    
+  }for
+ }
+ {  %% posa a true (visibles) tots els equidistants a la distància Z ncub x ncub
+  ncub
+  {
+   dup aVisibles exch true put
+   ncub dup mul add
+  }repeat
+  pop
+ }ifelse
+}for
+%% posa a true tota la lleixa vertical de davant de tot (malgrat alguns dels seus índex ja estiguin a true pel càlcul anterior)
+aVisibles length 1 sub dup ncub dup mul sub -1 exch
+{
+ aVisibles exch true put
+}for
+
+%aVisibles(OOO-OOO)pstack quit
+
+%% escollim la tipografia MM de treball
+(/Users/femfum/MultipleMaster/AdobeSans_AdobeSerif/ZX______.PFB)  %% Terminal
+%(/Library/WebServer/Documents/www.pliegos.net/maker/GerritNoordzij/ZX______.PFB)  %% localhost MacBookAir
 %% (/var/www/wordpress/maker/GerritNoordzij/ZX______.PFB)  %% servidor Teixidora
 /tipusMM exch def
 
+%% explorem tots els glifs de la font de treball
+%% crida a CharStrings, si existeix
+tipusMM findfont dup /CharStrings known
+{
+ /CharStrings get dup length /nGlifs exch def
+ /cionari exch def
+ %% cap glif del /WinAnsiEncoding no és a la font?
+ %systemdict /EncodingDirectory get /WinAnsiEncoding get
+ xifrat
+ {
+  dup cionari exch known
+  {
+   pop
+  }
+  {  %% quan algun glif de la /WinAnsiEncoding no és a joc de la tipografia de treball
+   ==
+   (\n\n >>> alguns glifs estandards no es troben en aquesta Font ...pleguem!\n\n)print flush exit
+  }ifelse
+ }forall
+}
+{
+ pop
+ (\n\n >>> aquesta Font no treballa amb CharStrings i no la podem explorar ...pleguem!\n\n)print flush exit
+}ifelse
+
+%% sabrem si el literal del glif malgrat no estigui a l'encoding WinAnsi sí que es troba dins la font (llavors el codificarem)
+ESaCharStrings?
+{  %% cerquem dins el /cionari dels CharStrings de la tipografia de treball
+ %% per assegurar aquesta crida ens cal haver executat la línia de comanda amb el flag -dPDFSETTINGS=/prepress
+ cionari glif known
+%{pop ==}forall(:::::)pstack quit
+ {  %% si hi és el codificarem a l'índex zero dins de xifrat
+  xifrat 0 glif put
+  %% i la cadena de glif tindrà codi zero
+  /glif (\000) def
+%glif(olaKase?)pstack quit
+ }
+ {  %% si no hi és
+  .notdef /glif exch def  %% tindrà el glif que haguen definit com a desconegut
+ }ifelse
+}
+{  %% és una string o encara un literal /.notdef
+ glif type /nametype eq
+ {  %% ha de ser un literal .notdef
+  glif cvx exec /glif exch def
+ }if
+}ifelse
+%% és a /WinA ??
+%% i si no, hi posarem el glif # /numersign de substitució
+%% el nom literal o l'string de text etiquetarà el desplegable de les lleixes
 
 %% explorem els eixos dinàmics de la MM i els llistem per triar amb quins treballarem
 %%MÈTODE0 d'anàlisi dels eixos mestres d'una MM
@@ -660,7 +815,8 @@ true
 %% fem un diccionari amb tots els eixos de variabilitat i els seus valors mestres dins una array
 /AsansMMeixosDinamics 0 dict def
 tipusMM findfont dup /FontInfo get dup /FIMM exch def
-/BlendAxisTypes get length 1 sub 0 exch 1 exch
+/BlendAxisTypes get dup /aMasters exch def
+length 1 sub 0 exch 1 exch
 {
  /araEix exch def
  AsansMMeixosDinamics 
@@ -676,7 +832,10 @@ dup length dict begin
  {def}{pop pop}ifelse
 }forall
 %% atenció que aquesta crida només és vàlida a Ghostscript!
-/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get def  %% xifrat WinAnsi
+/Encoding
+% systemdict /EncodingDirectory get /WinAnsiEncoding get
+xifrat
+ def  %% xifrat WinAnsi
 currentdict end /Camaleonica_WA exch definefont pop
 %% mooolt important: carreguem una (1) sola vegada el diccionari genèric ben xifrat de la MM
 /Camaleonica_WA findfont /AsansMMionari exch def
@@ -688,14 +847,16 @@ currentdict end /Camaleonica_WA exch definefont pop
 
 
 %% escollim els 2 eixos dinàmics amb els que volem treballar
-/Weight  %% pes
+%/Weight  %% pes
+aMasters 0 get
 /xyeix exch def
-/Width  %% ample
+%/Width  %% ample
+aMasters 1 get
 /zeix exch def
 
 
 %% escollim l'orientació (fuga) de la z (true: esquerra, false: dreta)
-%% però s'hauria de poder triar entre els 4 vents: NO (mestral), SO (garbí), SE (xaloc) i NE (gregal)
+%% però més endavant s'hauria de poder triar entre els 4 vents: NO (mestral), SO (garbí), SE (xaloc) i NE (gregal)
 true
 /zed exch def
 
@@ -720,17 +881,22 @@ dup begin  %% entrem dins el diccionari de la MM per poder cridar els procedimen
 %pop pop [261 228] aload pop  %% un de les millors tries tipogràfiques
 
 %%VALORS EXTREMS de pes i ample (per aquest ordre) de l' AdobeSans MM
- [1450 1450] aload pop  %% tot al màxim
- % [50 1450] aload pop  %% mínim pes màxim ample
- % [1450 50] aload pop  %% màxim pes mínim ample
- % [50 50] aload pop  %% mínim pes mínim ample
+ % [1450 1450] aload pop  %% manual tot al màxim
+ aMasters
+ {  %% ventem els màxims de forma automàtica?
+  AsansMMeixosDinamics exch get 1 get
+ }forall
+
+ % [50 1450] aload pop  %% manual mínim pes màxim ample
+ % [1450 50] aload pop  %% manual màxim pes mínim ample
+ % [50 50] aload pop  %% manual mínim pes mínim ample
 
 %%SNRD pes i ample random o no per aquí mateix de moment (a ús global en d'altres pàgines)
- true setglobal
- 2 copy 2 array astore
- globaldict exch
- /ARApesiampleRandomOno exch put
- false setglobal
+% true setglobal
+% 2 copy 2 array astore
+% globaldict exch
+% /ARApesiampleRandomOno exch put
+% false setglobal
 
  %% aquests dos procediments, i per aquest ordre, generen les dades necesàries del vector dins l'array
  NormalizeDesignVector  %% normalitza les dades de cada eix mestre en valors entre 0 i 1
@@ -748,12 +914,14 @@ dup
 %% generem l'array tridimensional de valors de pes/ample que alimentarà el generador d'instàncies
 /ii 0 def  %% comptador d'instàncies per personalitzar-ne el nom
 %% calculem el salt de l'ample (max - min : /ncub)
-AsansMMeixosDinamics zeix get aload pop exch sub ncub 1 sub div /saltZeix exch def
-1450 /maxAMPLE exch def  50 /minAMPLE exch def  %% valors màxim i mínim d'ample
+AsansMMeixosDinamics zeix get aload pop dup /maxAMPLE exch def
+1 index /minAMPLE exch def  %% 1450 50 valors màxim i mínim d'ample
+exch sub ncub 1 sub div /saltZeix exch def
 
 %% calculem el salt del pes ((max - min : /ncub x /ncub)
-AsansMMeixosDinamics xyeix get aload pop exch sub ncub dup mul 1 sub div /saltXYeix exch def
-1450 /maxPES exch def  50 /minPES exch def  %% valors màxim i mínim de pes
+AsansMMeixosDinamics xyeix get aload pop dup /maxPES exch def
+1 index /minPES exch def  %% 1450 50 valors màxim i mínim de pes
+exch sub ncub dup mul 1 sub div /saltXYeix exch def
 
 %% la descripció que fem és pel cub clàssic de 5x5 (però no pas la funcionalitat)
 true setglobal  %% no sabem si és del tot imprescindible
@@ -783,7 +951,7 @@ ifelse
      0 1 ncub 1 sub
      {  %% for els pesos (índex 0) canvien 25 cops per pla (5 per cada columna) de fina a negreta
       [  %% cada glif amb la seva instància, 5 glifs d'1 columna
-       exch saltXYeix mul maxPES exch sub round cvi  %% pes
+       exch saltXYeix mul maxPES exch sub %round cvi  %% pes, no cal que sigui enter, sinó tenim problemes per quadrar els extrems
        %% l'índex va de 4 a 0 perquè els glifs van de dalt a baix, o sigui a 4 hi ha d'anar el valor més fi i a 0 el més negret
        araPLAample  %% ample
       ]  %% cada glif amb la seva instància
@@ -1072,7 +1240,9 @@ dup begin  %% entrem dins el diccionari de la MM per poder cridar els procedimen
  4 -1 roll
 
 %%TEST
-%dup length array copy dup ==
+true setglobal
+dup length array copy dup /xARTICLE exch globaldict 3 1 roll put  % ==
+false setglobal
 
  aload pop  %% despleguem els valors de la instància
 
@@ -1156,13 +1326,51 @@ true  %% a tot
 
 %% fem un nom únic
 %%EP! hauríem de pescar els pesos i amples de cada lleixa en una array desada a banda dins la memòria global
-(Weight: ### Width: ### glif000) dup ii 64 string cvs dup length 3 exch sub 27 add exch putinterval /araTooltip exch def
+%% els noms dels masters i l'ordre seqüencial els hauríem de traure del diccionari de la font
+/araTooltip () def  %% cadena on farcirem cada tooltip que apuntarà al glif corresponent dins el cub via solapa d'articles
+/faTooltip 0 def  %% sumador progressiu de llargada i posicions de la cadena /araTooltip
+%(Weight: ### Width: ### glif 000) dup ii 64 string cvs dup length 3 exch sub 28 add exch putinterval /araTooltip exch def
+0 1 aMasters length 1 sub
+{
+ dup aMasters exch get 128 string cvs dup length dup /araVA1 exch def faTooltip add /faTooltip exch def
+ exch xARTICLE exch get 128 string cvs dup length faTooltip add 3 add /faTooltip exch def
+ %% farcim
+ faTooltip string dup 0 5 -1 roll putinterval 
+ dup araVA1 (: ) putinterval
+ dup araVA1 2 add 4 -1 roll putinterval
+ dup dup length 1 sub ( ) putinterval
+ araTooltip length dup /araVA0 exch def faTooltip add string dup 0 araTooltip putinterval
+ dup araVA0 4 -1 roll putinterval
+ /araTooltip exch def
+ /faTooltip 0 def
+}for
+(glif 0000 ) /TXTnGlif exch def
+%%TEST
+araTooltip length dup /araVA exch def TXTnGlif length add string dup 0 araTooltip putinterval
+dup araVA TXTnGlif putinterval dup dup length ii 64 string cvs dup length 3 -1 roll exch sub
+1 sub
+exch putinterval
+%%GlifVisible aquí podrém posar un caràcter que signifiqués que aquest glif és visible amb el cub muntat
+dup dup length 1 sub
+aVisibles ii 1 sub get
+{  %% marquem amb un asterisc (42) el glif visible dins el cub muntat
+ 42 put 
+% (::::)pstack quit
+}
+{
+ pop pop
+%% (!!!!)pstack quit
+}ifelse
+%% hi fegim el núm. de lleixa que toca per tal es faci evident on trobar visualment el glif encara que es tigui tapat
+(Lleixa:    / ) dup 8 iL 2 string cvs putinterval dup length dup /araVa exch def 2 index length add
+string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll araVa exch putinterval
+/araTooltip exch def
 
 %%Constatem amb alegria que els articles obeeixen al mateix sistema de coordenades amb el que componem els glifs
 %% cosa que no fan d'altres objectes del pla interactiu de pdf, com les anotacions o els formularis (les descartem aquí)
-%% tenen en comú però que tampoc NO obeeixen els Optional Contents, o sigui que ignoren les capes
-%% amb l'avantatge de comptar amb una solapa pròpia de navegació ens permetrà localitzar els pesos clicant sobre el glif
-%% poser hauríem d'obrir el PDF amb aqusta la solapa activa més que amb le de les capes
+%% tenen en comú però que tampoc NO obeeixen els Optional Contents, o sigui que ignoren les capes on han estat creats
+%% compten amb solapa pròpia de navegació que ens permetrà consultar pesos i amples clicant sobre el glif (però no a l'inrevés)
+%% potser hauríem d'obrir el PDF amb aquesta la solapa activa més que amb la de les capes?
 %% el viewer de PDF a Firefox: TÉ la solapa de capes i funciona, també podem veure la solapa d'articles però els links no van
 %% el viewer de PDF a Brave/Chrome: NO té la solapa de capes, té la solapa d'articles però els links no van
 [
@@ -1316,7 +1524,7 @@ dup 0 get 0 get 0 get abs  %% LL
 1 index ncub 1 sub get 0 get 2 get  %% LR
 add /cNx exch def  %% distància X (valor X del cub de Noordzij)
 
-%% definim els 4 marges de posicionament del cub a dins la pàgina
+%% definim els 4 marges (ara mínims) de posicionament del cub a dins la pàgina
 50
 /mep exch def
 
@@ -1352,7 +1560,7 @@ false{
 %      /Encoding <</PDFDocEncoding 12 0 R >>
     >>
 /DA (/Helv 0 Tf 0 g )
-           >> /PUT pdfmark
+          >> /PUT pdfmark
  [ {Catalog} << /AcroForm {aform} >> /PUT pdfmark
  [ {afields} {tooltips} /APPEND pdfmark
 
@@ -1572,17 +1780,26 @@ FEMlleixes
  mark /_objdef araOG cvx exec /type/array /OBJ pdfmark  %% l'objecte array es crea per cada glif a afegir a {objOrder}
 
  mark araOG cvx exec
- %GLiF
  (Cub de Noordzij)
  128 string cvs dup length dup /araVa exch def 4 add dup /araVa2 exch def
- %ffile
- glif 128 string cvs
- length add
- dup /araVa3 exch def 1 add string dup 3 -1 roll 0 exch putinterval dup araVa (   {) putinterval dup araVa2
- % ffile
- glif 128 string cvs
- putinterval
- dup araVa3 (}) putinterval
+ 
+ Acmptdr
+ {
+  CUBescriu
+  {  %% etiquetem el desplegable de les lleixes amb el text a escriure
+   % txtcub
+  }
+  {  %% etiquetem el desplegable de les lleixes amb el genèric d'assaig
+   /txtcub (ASSAIG) def
+  }ifelse
+ }
+ {  %% etiquetem el desplegable de les lleixes amb el nom literal del glif
+  xifrat glif 0 get get 128 string cvs /txtcub exch def
+ }ifelse 
+ txtcub length add
+ dup /araVa3 exch def 3 add string dup 3 -1 roll 0 exch putinterval dup araVa ( // ) putinterval dup araVa2
+ txtcub putinterval
+ dup araVa3 ( //) putinterval
  /APPEND pdfmark  %% afegim el nom del glif i del fitxer de la font a l'objecte array
 
  mark araOG cvx exec
@@ -1726,7 +1943,28 @@ mark
 /Title
 (l'icònic cub de Gerrit Noordzij)
 /Author (copyleft 2023: Marcantoni Malagarriga-Picas <marcantoni@femfum.com>)
-/Keywords (PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij, https://ja.cat/NoordzijCub, https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=é)
+
+%% reproduïm la URL original que ha generat el pdf (també si treballem via Terminal)
+/Keywords (https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=)
+nDocInfo 128 string cvs dup length 2 index length dup /araVA exch def add string dup
+4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
+(&cos=) dup length 2 index length dup /araVA exch def add string dup
+4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
+cDocInfo 128 string cvs dup length 2 index length dup /araVA exch def add string dup
+4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
+(&glif=) dup length 2 index length dup /araVA exch def add string dup
+4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
+gDocInfo type /nametype eq
+{
+ (\/) dup length 2 index length dup /araVA exch def add string dup
+ 4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
+}if
+gDocInfo 128 string cvs dup length 2 index length dup /araVA exch def add string dup
+4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
+%% cua de paraules clau
+(, PostScript, Ghostscript, MultipleMaster, PDF, Optional Content, generative code, typography, Gerrit Noordzij, https://ja.cat/NoordzijCub) dup length 2 index length dup /araVA exch def add string dup
+4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
+
 /Creator (https://github.com/marcantonifemfum/CubNoordzij/blob/main/Noordzij_cub.ps)
 /DOCINFO pdfmark
 %% podríem generar un camp privat per desar-hi tots els paràmetres clau de les variables aleatòries que han fet el PDF
