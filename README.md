@@ -10,11 +10,11 @@
 
 aeiou
 
-**La Tipografia**
+*La Tipografia*
 
 AdobeSansMM té 2 eixos mestres (masters): /Weight i /Width
 
-**l'intèrpret**
+```l'intèrpret```
 
 aeiou
 
