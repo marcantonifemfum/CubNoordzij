@@ -6,11 +6,12 @@
 
 	COM TREBALLA?
 
-El codi:
+**El codi**
 
-La Tipografia: AdobeSansMM té 2 eixos mestres (masters): /Weight i /Width
+**La Tipografia**
+AdobeSansMM té 2 eixos mestres (masters): /Weight i /Width
 
-l'intèrpret:
+**l'intèrpret**
 
 
 Genera dinàmicament via URL el cub de Noordzij clàssic en format PDF, amb tres paràmetres variables:
@@ -33,19 +34,23 @@ L'ordre de creixement de l'eix Z de l'ample (/Width) és: el mínim a la lleixa 
 
 	COM HO FEM ANAR?
 									
->> text normal <<
+>> text normal
 https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=é
->> codi hexadecimal <<
+
+>> codi hexadecimal
 https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=%E9
->> nom del glif <<
+
+>> nom del glif
 https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=/eacute
->> amb el codi decimal <<
+
+>> amb el codi decimal
 https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=233
 
 
 https://ja.cat/NoordzijCub
 
-Repositori a Github
+
+*Repositori a Github*
 
 
 	ERRORS
