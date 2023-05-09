@@ -1,57 +1,68 @@
 %!
-%%
-%% https://github.com/marcantonifemfum/CubNoordzij/blob/main/LICENSE
+%#  `GNU AGPL Noordzij_cub.ps v0.1´ és un algorisme que genera dinàmicament l'icònic cub de Gerrit Noordzij,
+%#  en format PDF, amb variables diverses (glif, instàncies, cos, etc), lleixes (Layers) i detalls per glif (Articles).
+%#  Per a intèrprets `GNU AGPL Ghostscript´ però també, amb ben pocs retocs, pot córrer
+%#  amb l'Adobe Acrobat Distiller (fins hi tot amb MacOSX PSNormalizer Framework/Apple pstopdf).
+%# 
+%#  `Copyleft 2023 :: l'Ametlla de Merola :: Marcantoni Malagarriga-Picas´
+%#  `<http://www.femfum.com> | <marcantoni@femfum.com>´
+%#  `https://github.com/marcantonifemfum/CubNoordzij´
+%#
+%#  Detall de la llicència `https://github.com/marcantonifemfum/CubNoordzij/blob/main/LICENSE´
 
-%% Fem el cub dinàmic de Gerrit Noordzij, per defecte, en el seu estat inicial: un cub isomètric, fugant a mestral (NO)
-%% construït amb 5 plans quadrats de 5x5 glifs per pla, tal i com observem en el cub original a la portada del llibre
+%% El cub original de Gerrit Noordzij, fa:
+%% un cub isomètric, fugant a mestral (NO), construït amb 5 plans quadrats de 5x5 glifs per pla,
+%% tal i com observem en el cub original a la portada del llibre:
 %% «De streek Theorie van het schrift» https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg
 %% Noordzij fa treballar les instàncies de la tipografia en 3 eixos dinàmics:
 %% a l'eix de les X evoluciona el pes, d'esquerra a dreta, de fina a negreta
 %% a l'eix de les y evoluciona la serifa, de dalt a baix, de punxa a escapçat
 %% a l'eix de les Z evoluciona el contrast, de davant a darrera (fugant cap el NO) de menys contrast a més contrast
 
-%% Nosaltres fem
-
-%% per clonar-ho hauríem de localitzar una tipografia que tingués aquests 3 eixos dinàmics (pes, serifa, contrast)
-%% quan traslladem el codi a JS/canvas, CSS, html ho tindrem més fàcil
-
-%% però tenim d'altres alternatives:
-%% AdobeSans (Serif) MM, sempre el mateix glif, X,Y: pes, Z: ample
-%% implementat: en un mateix pla, l'ample es manté i els pesos extrems són al UR (màxim pes) i al LL (mínim pes) 
-%% el pes a les columnes ara va de baix a dalt i l'ample va de més estret (primer pla) a més ample (pla final de fuga)
-%% les capes són opcionals i descriuen...
-%% podríem afegir una anotació sensible a cada glif per fer visible el valor de pes/ample que l'ha generat
-%% AdobeSans (Serif) MM, X: pes, Y: sèrie de /ncub glifsi (però mantenint el pes en vertical), Z: ample
-%% per implementar
-%% AdobeMinion, sempre el mateix glif, X: pes , Y: ample , Z: correcció òptica
-%% per implementar
-
-%% definim un seguit de paràmetres dinàmics i activem les lleixes de pdf (Optinal Content)
-%% aquest algorisme podria beure de valors aleatoris cada cop que s'executi
-%% aquest algorisme és ideal per fer-ne un paral·lel mirall entre l'ús de les MM i les vOTF via js/canvas/CSS/SVG
-
 %% Origin_of_Patterning_LU_OPT.pdf (pàg.233)
-%% «The ranges of sort of contrast and reduction of contrast can be set out on
-%% dimensions of a cube [...] My description of the cube is a mixture of
-%% technology, design, cultural history, and psychology with a flavor of
-%% cultural anthropology; a square kind of fortune-telling»
+%% «The ranges of sort of contrast and reduction of contrast can be set out on dimensions of a cube [...]
+%% My description of the cube is a mixture of technology, design, cultural history, and psychology with a
+%% flavor of cultural anthropology; a square kind of fortune-telling»
 %% Gerrit Noordzij «The Shape of the Stroke» Raster Imaging and Digital Typography
 %% (New York: Cambridge University Press, 1991), pp. 34-42 (p.38)
 %% https://www.typemag.org/post/it-all-starts-with-writing-gerrit-noordzij
 
-%% generem un espai de coordenades en fals 3D i perspectiva isomètrica (x120 y120 z120)
-%% per les limitacions actuals del intèrpret GS, treballem amb tipografies MM
-%% escollim un glif
-%% generem n graelles de nxn glifs (el cub de Noordzij n val 5)
-%% en el pla x,y les caselles s'ordenen de dalt a baix i d'esquerra a dreta (o a l'inrevés)
-%% a l'eix 2D x,y treballem amb 1 eix dinàmic (p.e. pes o ample)
-%% en el pla z les caselles s'ordenen de dreta a esquerra (fuga cap a l'esquerra)
-%% a l'eix 3D z treballem amb 1 eix dinàmic (p.e. ample, contrast del ductus o color)
-%% cadascun dels plans 3D verticals hauria d'estar en una lleixa
-%% el càlcul del format de pàgina hauria d'anar en funció del cos escollit
-%% o el cos hauria d'anar en funció del format de pàgina escollit
+%% Nosaltres fem:
+%% un cub isomètric, fugant a mestral (NO), construït amb n plans quadrats de nxn glifs per pla,
+%% generem un espai de coordenades en fals 3D i perspectiva isomètrica (X120 Y120 Z120)
+%% per defecte, treballem amb la tipografia Adobe Sans MM
+%% escollim un (1) glif, escrit directe via teclat, pel seu nom literal o pel seu codi decimal (via URL també en hexa)
+%% per defecte, en el pla XY, els glifs s'ordenen de baix a dalt i d'esquerra a dreta
+%% per defecte, en el pla XY, el pes dels glifs (Weight) s'ordena de dalt a baix i d'esquerra a dreta
+%% per defecte, en el pla Z, les lleixes (Layers de nxn glifs) s'ordenen d'esquerra a dreta
+%% per defecte, en el pla Z, l'ample dels glifs (Width) s'ordena d'esquerra a dreta
+%% per defecte, en el pla XY, treballem amb 1 eix dinàmic: el pes (Weight)
+%% per defecte, en el pla Z, treballem amb 1 eix dinàmic: l'ample (Width)
+%% per defecte, cadascun dels plans 3D verticals són una lleixa (solapa Layers)
+%% valors a escollir entre 2 i 12 (dimensió del cub nxnxn)
+%% per defecte, el detall de les instàncies de cadascun dels glifs (pes i ample) s'etiqueten a la solapa Articles
+%% valors fixos entre 50 i 1450 per a les instàncies de cadascun dels eixos de pes i ample, Weight i Width
+%% el càlcul del format de pàgina va en funció del cos escollit
+%% valors del cos a escollir entre 2 i 200 punts
+%% dins el cub, al vèrtex NO hi ha el glif amb el valor màxim de pes i ample
+%% dins el cub, al vèrtex SE hi ha el glif amb el valor mínim de pes i ample
+%% dins el cub, al vèrtex SO hi ha el primer glif que es compon
+%% dins el cub, al vèrtex NE hi ha el darrer glif que es compon
+%% per defecte, a la solapa Articles s'etiqueta els glifs visibles (amb el cub muntat) amb un asterisc * al final
+%% per defecte, a la solapa Layers s'etiqueta el desplegable amb el nom literal del glif
 
-%% a la línia de comanda és fonamental activar el flag -dPDFSETTINGS=/prepress perquè no ens alteri la font!
+%% si traslladem el codi a JS/canvas, CSS, html podrem clonar el Cub de Noordzij localitzant una tipografia que
+%% tingui 3 eixos dinàmics de pes, serifa i contrast
+
+%% Dins les MM, tenim d'altres alternatives:
+%% AdobeSerif MM, X,Y: pes, Z: ample
+%% AdobeMinion MM, X: pes , Y: ample , Z: correcció òptica (no operativa amb GS 10?)
+%% MoveMe MM de Lucas de Groot (no operativa amb GS 10?)
+
+%% aquest algorisme podria beure de valors aleatoris cada cop que s'executi
+%% aquest algorisme és ideal per fer-ne un paral·lel mirall entre l'ús de les MM i les vOTF via js/canvas/CSS/SVG
+
+%% al Terminal la línia de comanda ha de dur el flag -dPDFSETTINGS=/prepress perquè no ens substitueixi la font!
 %% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -f Noordzij_cub.ps
 
 %%Assaig del comptador per veure com creix la distribució dins el cub
@@ -88,7 +99,7 @@ CUBescriu Acmptdr and
   }ifelse
  }
  {  %% la variable d'entorn NO existeix perquè executem l'applet en local via Terminal per línia de comanda
-  100  %% valors enters, de 2 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+  5  %% valors enters, de 2 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 }ifelse
@@ -674,7 +685,7 @@ glif type /integertype eq
   }ifelse
  }  
  {  %% la variable d'entorn NO existeix perquè executem l'applet en local via Terminal per línia de comanda
-  0  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
+  200  %% valors enters, de 1 fins a # (quan ncub és > 100 posa a prova les CPU en el càlcul tot i generar un arxiu de pocs Kb)
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 %% escollim un cos
@@ -1956,7 +1967,7 @@ cDocInfo 128 string cvs dup length 2 index length dup /araVA exch def add string
 4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
 gDocInfo type /nametype eq
 {
- (\/) dup length 2 index length dup /araVA exch def add string dup
+ (/) dup length 2 index length dup /araVA exch def add string dup
  4 -1 roll 0 exch putinterval dup 3 -1 roll araVA exch putinterval
 }if
 gDocInfo 128 string cvs dup length 2 index length dup /araVA exch def add string dup
