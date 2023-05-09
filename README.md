@@ -1,16 +1,16 @@
 # CubNoordzij
- Generador tipogràfic pel cub de Noordzij en PDF / Dynamic Noordzij cube PDF generator for variable fonts
+ Generador tipogràfic pel cub de Noordzij en PDF / *Dynamic Noordzij cube PDF generator for variable fonts*
  
-\[ català ]
+\[ CA ]
 
 
 	COM TREBALLA?
 
-**El codi**
+```El codi```
 
-aeiou
+Noordzij_cub.ps …
 
-*La Tipografia*
+```La tipografia```
 
 AdobeSansMM té 2 eixos mestres (masters): /Weight i /Width
 
@@ -29,11 +29,11 @@ Genera dinàmicament via URL el cub de Noordzij clàssic en format PDF, amb tres
 
 Treballem de forma fixa dins la perspectiva isomètrica (xyz a 120° fugant al NO) que Gerrit Noordzij va glorificar a la portada de
 
-L'ordre de posicionament dels glifs (que no coincideix amb l'ordre de creixement dels màsters) és: el primer glif es situa al vèrtex SO del cub i el darrer glif (XxYxZ) es situa al vètex NE del cub. Els glifs s'ordenen en columnes, de baix a dalt i d'esquerra a dreta de cada lleixa (instàncies amb el mateix /Width)
+L'ordre de posicionament dels glifs (no coincideix amb l'ordre de creixement dels màsters) és: el primer glif es situa al vèrtex SO del cub i el darrer glif es situa al vètex NE del cub. Els glifs s'ordenen en columnes, de baix a dalt i d'esquerra a dreta de cada lleixa (instàncies amb el mateix /Width)
 
 L'ordre de creixement de l'eix X,Y del pes (/Weigth) és: en columnes de dalt a baix i de d'esquerra a dreta
 
-L'ordre de creixement de l'eix Z de l'ample (/Width) és: el mínim a la lleixa (pla vertical) de davant de tot i, el màxim, a la lleixa del darrera de tot (pla vertical d'índex 0)
+L'ordre de creixement de l'eix Z de l'ample (/Width) és: el mínim a la lleixa de davant de tot i, el màxim, a la lleixa del darrera de tot (pla vertical d'índex 0)
 
 
 
@@ -69,11 +69,11 @@ aeiou
 
 aeiou
 
-	COM EL SEGUIREM FENT CRÉIXER?
+	COM SEGUIRÀ EVOLUCIONANT?
 
 aeiou
 
 
-\[ english ]
+\[ EN ]
 
 Comming soon…
