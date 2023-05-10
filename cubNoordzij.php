@@ -56,8 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
  $cos=$_GET['cos'];
 //echo($cos.'<br>');
 // $full=$_GET['full'];
-//echo($full.'<br>');
-//exit(' ...em veus?');
+//echo(mb_ord("$glif", 'ISO-8859-1') . '<br>');
+//$aveure = IntlChar::ord("\u{2603}");
+//echo(rawurlencode($glif));
+//exit('<br>' . ' ...em veus?');
 }
 else
 {  // Si fem POST: les variables vindran triades des d'index_##.php
@@ -177,7 +179,7 @@ $pdfFile = $somaPDF . $pdfnomes;
 
 //SNRD
 // EP crida a partir de la versió GS 9.55 al localhost del MacBookAir
-$command = $somaGS . "gs -q -dNOSAFER -o '" . $pdfFile . "' -sDEVICE=pdfwrite -dAutoRotatePages=/None -f '" . $PSapplet . "'";
+$command = $somaGS . "gs -q -dNOSAFER -o '" . $pdfFile . "' -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -dAutoRotatePages=/None -f '" . $PSapplet . "'";
 
 //echo $command;
 //exit(" <<<< EP!");
