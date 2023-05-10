@@ -1,6 +1,8 @@
 # CubNoordzij
- Generador tipogràfic pel cub de Noordzij en PDF / *Dynamic Noordzij cube PDF generator for variable fonts*
- 
+  \[ CA ] Generador tipogràfic d'instàncies variables pel cub de Noordzij en PDF
+  \[ EN ] *Dynamic Noordzij cube PDF generator for variable fonts*
+
+
 \[ CA ]
 
 
@@ -8,15 +10,27 @@
 
 ```El codi```
 
-Noordzij_cub.ps …
+Noordzij_cub.ps és l'algorisme, escrit en llenguatge PostScript, que genera dinàmicament l'icònic cub de Gerrit Noordzij, amb un ampli espectre de variables, tres de les quals són configurables via URL a través de les variables: xyz (instàncies 3D), cos i glif
 
 ```La tipografia```
 
-AdobeSansMM té 2 eixos mestres (masters): /Weight i /Width
+Adobe Sans MM és la tipografia (Multiple Master) de treball per aquest prototip. Té 2 eixos mestres (masters) dinàmics: /Weight i /Width, amb un ampli rang de valors d'instàncies que van de 50 a 1450
 
-```l'intèrpret```
+```l'Intèrpret```
 
-aeiou
+Ghostscript és l'intèrpret de llenguatge PostScript que treballa en servidors i màquines locals. Un projecte de codi obert (i també d'ús comercial) que fa més de 30 anys que creix en prestacions i eficiència. Actualment [Artifex Software, Inc.](https://ghostscript.com/) és qui el manté.
+
+```Interfície URL```
+
+cubNoordzij.php és qui permet executar l'algorisme via URL on, dins la mateixa adreça, hi tenim 3 variables amb les que podem jugar.
+
+```Les 3 variables```
+
+xyz=
+
+cos=
+
+glif=
 
 
 Genera dinàmicament via URL el cub de Noordzij clàssic en format PDF, amb tres paràmetres variables:
@@ -37,7 +51,7 @@ L'ordre de creixement de l'eix Z de l'ample (/Width) és: el mínim a la lleixa 
 
 
 
-	COM HO FEM ANAR?
+	URLs D'EXECUCIÓ
 									
 > text normal
 
