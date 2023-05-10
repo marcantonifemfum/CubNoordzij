@@ -28,7 +28,7 @@ La sintaxi dins la URL és sensitiva a caixa, qualsevol canvi de majúscules/min
 
 *xyz=* nombre de glifs constructors pels 3 eixos XYZ. Coincideix amb el nombre d'instàncies variables de la tipografia. Ha de ser un valor enter entre 2 i 12
 
-*cos=* cos del glif en punts tipogràfics. Pot ser un nombre enter amb decimals, entre 2 i 200 punts. El seu valor i el de xyz condicionen el format de pàgina.
+*cos=* cos del glif en punts tipogràfics. Pot ser un nombre enter amb decimals, entre 2 i 200 punts. El seu valor i el de *xyz* condicionen el format de pàgina.
 
 *glif=* un sol (1) glif a compondre, descrit amb 4 notacions possibles:
 
@@ -39,9 +39,18 @@ La sintaxi dins la URL és sensitiva a caixa, qualsevol canvi de majúscules/min
 	
 ```El PDF resultant```
 
+Un cop activem la URL d'execució dins la barra d'acreces d'un navegador, en pocs segons s'interpreta l'algorisme i es genera un PDF que apareix en pantalla (del navegador o visor de PDF) o es descarrega (depenent del dispositiu des d'on ens connectem).
+
+	Contingut de pàgina
+Gerrit Noordzij va glorificar a la portada del llibre «[De streek Theorie van het schrift](https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg)» un cub en perpectiva isomètrica (XYZ a 120° fugant la Z al NO)
+
+	Solapa lleixes (layers)
 
 
-Treballem de forma fixa dins la perspectiva isomètrica (xyz a 120° fugant al NO) que Gerrit Noordzij va glorificar a la portada de
+	Solapa Articles
+
+
+	DocInfo (propietats del document) 
 
 L'ordre de posicionament dels glifs (no coincideix amb l'ordre de creixement dels màsters) és: el primer glif es situa al vèrtex SO del cub i el darrer glif es situa al vètex NE del cub. Els glifs s'ordenen en columnes, de baix a dalt i d'esquerra a dreta de cada lleixa (instàncies amb el mateix /Width)
 
@@ -53,7 +62,7 @@ L'ordre de creixement de l'eix Z de l'ample (/Width) és: el mínim a la lleixa 
 
 	URLs D'EXECUCIÓ
 
-Les adreces que segueixen exploren sintaxi i formats diversos per un mateix glif:
+Les adreces que segueixen exploren sintaxi i formats diversos per a un mateix glif:
 
 > 5x5x5 instàncies, a cos 72, amb el glif è escrit amb text normal
 
