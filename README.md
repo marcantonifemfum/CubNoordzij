@@ -54,7 +54,7 @@ Gerrit Noordzij va glorificar a la portada del llibre «[De streek Theorie van h
 
 L'ordre de posicionament dels glifs (no coincideix amb l'ordre de creixement dels màsters) és: per defecte, en el pla XY, els glifs s'ordenen de baix a dalt i d'esquerra a dreta. En el pla XY, el pes dels glifs (Weight) s'ordena de dalt a baix i d'esquerra a dreta. En el pla Z, les lleixes (Layers de nxn glifs) s'ordenen d'esquerra a dreta, també en el pla Z, l'ample dels glifs (Width) s'ordena d'esquerra a dreta. En el pla XY, treballem amb 1 eix dinàmic: el pes (Weight), en el pla Z, treballem amb 1 eix dinàmic: l'ample (Width)
 
-	Solapa lleixes (layers)
+	Solapa lleixes (Layers)
 	
 En aquest prototip millorem encara més la visió dels glifs ocults, en els plans verticals que formen el cub, incorporant-los en una lleixa (Layers) a la solapa de capes de PDF (Nagivation Panes), que permet aïllar i veure-les una a una. Aquesta opció és activa per defecte.
 
@@ -64,8 +64,7 @@ Per fer un seguiment dels valors de les instàncies (pes i ample) de cada glif, 
 
 	DocInfo (propietats del document) 
 	
-En tots els visors de PDF
-
+En tots els visors de PDF podem accedir a les propietats del document (p.e. CNTRL+D a Acrobat), on s'hi ens fixem en el camp de Paraules Clau (Keywords), hi veurem escrita la URL amb que hem generat el PDF, amb totes les variables de l'execució.
 
 	URLs D'EXECUCIÓ
 
@@ -95,16 +94,20 @@ https://ja.cat/NoordzijCub
 
 	ERRORS
 
-aeiou
+Alguns descuits en la sintaxi d'escriptura de la URL poden provacar errors d'execució, en forma d'un PDF en blanc o en forma d'una pàgina informativa on se'ns donen detalls del què ha passat. Per exemple, si al camp *xyz=* hi posem un text en comptes d'un numèric, succeix això… https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=aeiou&cos=72&glif=/germandbls
 
 
 	VISORS DE PDF
 
-aeiou
+Més enllà de l'Adobe Acrobat, els navegadors d'Internet han incorporat *viewers* de PDF que incrusten el document dins una finestra com si es tractés d'un document html. Aquests intèrprets (escrits en JS) no sempre poden accedir a les funcionalitats que aquest estàndard permet. Per exemple: les capes no són visibles en els *viewers* nadius dels navegadors Chrome i Brave. En canvi, sí que ho són al vsualitzador de PDF de Mozilla Firefox. En tots aquest navegadors s'hi poden veure les etiquetes dels glifs (solapa Articles) però en canvi en cap són clicables.
 
 	COM SEGUIRÀ EVOLUCIONANT?
 
-aeiou
+Tenim previst escriure un algorisme paral·lel dins un entorn JS Canvas/SVG que ens permeti fer el mateix i on la pantalla del dispositiu sigui la que mani en tot moment. Un complement menys lúdic i més tipogràficament útil que el que han desenvolupat la gent d'[Axis-Praxis](https://www.axis-praxis.org/playground/cube/).
+
+Hauríem de poder treballar amb col·leccions d'instàncies estàtiques ja creades. Pel que fa a incorporar les Variable Fonts (OTF/TTF/WOFF/WOFF2) dinàmicment, necessitaríem col·laborar amb alguna llibreria (Python?) que treballes dinàmicament per generar-les *on the fly*.
+
+Mentre esperem que Ghostscript/Freetype incporporin operadors al mateix nivell de rapidesa i precisió amb que treballem les MM, no podrem establir un diàleg fluïd amb el nostre vell i estimat llenguatge PostScript.
 
 
 \[ EN ]
