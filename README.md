@@ -5,20 +5,19 @@
 
 \[ CA ]
 
-
 	COM TREBALLA?
 
 ```El codi```
 
-Noordzij_cub.ps és l'algorisme, escrit en llenguatge PostScript, que genera dinàmicament l'icònic cub de Gerrit Noordzij, amb un ampli espectre de variables, tres de les quals són configurables via URL a través de les variables: xyz (instàncies 3D), cos i glif
+[Noordzij_cub.ps](https://github.com/marcantonifemfum/CubNoordzij/blob/main/Noordzij_cub.ps) és l'algorisme, escrit en llenguatge PostScript, que genera dinàmicament l'icònic cub de Gerrit Noordzij, amb un ampli espectre de variables, tres de les quals són configurables via URL a través de les variables: xyz (instàncies 3D), cos i glif
 
 ```La tipografia```
 
-Adobe Sans MM és la tipografia (Multiple Master) de treball per aquest prototip. Té 2 eixos mestres (masters) dinàmics: /Weight i /Width, amb un ampli rang de valors d'instàncies que van de 50 a 1450
+*Adobe Sans MM* és la tipografia (Multiple Master) de treball per aquest prototip. Té 2 eixos mestres (masters) dinàmics: /Weight i /Width, amb un ampli rang de valors d'instàncies que van de 50 a 1450
 
 ```l'Intèrpret```
 
-Ghostscript és l'intèrpret de llenguatge PostScript que treballa en servidors i màquines locals. Un projecte de codi obert (i també d'ús comercial) que fa més de 30 anys que creix en prestacions i eficiència. Actualment [Artifex Software, Inc.](https://ghostscript.com/) és qui el manté.
+*Ghostscript* és l'intèrpret de llenguatge PostScript® que treballa en servidors i màquines locals. Un projecte de codi obert (i també d'ús comercial) que fa més de 30 anys que creix en prestacions i eficiència. Actualment [Artifex Software, Inc.](https://ghostscript.com/) és qui el manté.
 
 ```Interfície URL```
 
