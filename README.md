@@ -49,17 +49,21 @@ L'algorisme disposa de molts altres paràmetres amb variabiltat (ordenació de g
 Un cop activem la URL d'execució dins la barra d'acreces d'un navegador, en pocs segons s'interpreta l'algorisme i es genera un PDF que apareix en pantalla (del navegador o visor de PDF) o es descarrega (depenent del dispositiu des d'on ens connectem).
 
 	Contingut de pàgina
+	
 Gerrit Noordzij va glorificar a la portada del llibre «[De streek Theorie van het schrift](https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg)» un cub tipogràfic en perspectiva isomètrica (XYZ a 120° fugant la Z al NO) que permet visonar la variabilitat del ductus d'un mateix glif en molts aspectes.
 
 L'ordre de posicionament dels glifs (no coincideix amb l'ordre de creixement dels màsters) és: per defecte, en el pla XY, els glifs s'ordenen de baix a dalt i d'esquerra a dreta. En el pla XY, el pes dels glifs (Weight) s'ordena de dalt a baix i d'esquerra a dreta. En el pla Z, les lleixes (Layers de nxn glifs) s'ordenen d'esquerra a dreta, també en el pla Z, l'ample dels glifs (Width) s'ordena d'esquerra a dreta. En el pla XY, treballem amb 1 eix dinàmic: el pes (Weight), en el pla Z, treballem amb 1 eix dinàmic: l'ample (Width)
 
 	Solapa lleixes (layers)
+	
 En aquest prototip millorem encara més la visió dels glifs ocults, en els plans verticals que formen el cub, incorporant-los en una lleixa (Layers) a la solapa de capes de PDF (Nagivation Panes), que permet aïllar i veure-les una a una. Aquesta opció és activa per defecte.
 
 	Solapa Articles
+	
 Per fer un seguiment dels valors de les instàncies (pes i ample) de cada glif, es genera una etiqueta informativa de cadascun d'ells dins la solapa d'Articles (Nagivation Panes). Si treballem a un cos considerabñe (més de 100 punt), els glifs són clicables i amb la solapa d'Articles desplegada veurem l'ordre i valors de cadascun en una etiqueta lateral (i viceversa). Aquesta opció és activa per defecte.
 
 	DocInfo (propietats del document) 
+	
 En tots els visors de PDF
 
 
