@@ -1,6 +1,5 @@
 # CubNoordzij
-  \[ CA ] Generador tipogràfic d'instàncies variables pel cub de Noordzij en PDF
-  \[ EN ] *Dynamic Noordzij cube PDF generator for variable fonts*
+  *Dynamic Noordzij cube PDF generator for variable fonts* / Generador tipogràfic d'instàncies variables pel cub de Noordzij en PDF
 
 
 \[ CA ]
@@ -13,23 +12,29 @@
 
 ```La tipografia```
 
-*Adobe Sans MM* és la tipografia (Multiple Master) de treball per aquest prototip. Té 2 eixos mestres (masters) dinàmics: /Weight i /Width, amb un ampli rang de valors d'instàncies que van de 50 a 1450
+*Adobe Sans MM* és la tipografia (Multiple Master) de treball per aquest prototip. Té 2 eixos mestres (masters) dinàmics: /Weight i /Width, amb un ampli rang de valors d'instàncies que van de 50 a 1450. Aquesta font és a totes les màquines que tenen instal·lat AcrobatReader.
 
 ```l'Intèrpret```
 
-*Ghostscript* és l'intèrpret de llenguatge PostScript® que treballa en servidors i màquines locals. Un projecte de codi obert (i també d'ús comercial) que fa més de 30 anys que creix en prestacions i eficiència. Actualment [Artifex Software, Inc.](https://ghostscript.com/) és qui el manté.
+*Ghostscript* és l'intèrpret de llenguatge PostScript® que treballa en servidors i màquines locals. Un projecte de codi obert (i també d'ús comercial) que fa més de 30 anys que creix en prestacions i eficiència (ve de sèrie a totes les distribucions de Linux). Actualment [Artifex Software, Inc.](https://ghostscript.com/) és qui manté el projecte.
 
 ```Interfície URL```
 
-cubNoordzij.php és qui permet executar l'algorisme via URL on, dins la mateixa adreça, hi tenim 3 variables amb les que podem jugar.
+[cubNoordzij.php](https://github.com/marcantonifemfum/CubNoordzij/blob/main/cubNoordzij.php) és qui permet executar l'algorisme via URL on, dins la mateixa adreça, hi tenim 3 variables amb les que podem jugar.
 
 ```Les 3 variables```
 
-xyz=
+La sintaxi dins la URL és sensitiva a caixa, qualsevol canvi de majúscules/minúscules pot induir un error o l'execució d'un PDF *per defecte*, un cub de Noordzij amb un glif **e** de 5x5x5.
 
-cos=
+*xyz=* nombre de glifs constructors pels 3 eixos XYZ. Coincideix amb el nombre d'instàncies variables de la tipografia. Ha de ser un valor enter entre 2 i 12
 
-glif=
+*cos=* cos del glif en punts tipogràfics. Pot ser un nombre enter amb decimals, entre 2 i 200 punts. El seu valor i el de xyz condicionen el format de pàgina.
+
+*glif=* un sol (1) glif a compondre, descrit amb 4 notacions possibles:
+	> glif=/egrave *nom literal normatiu del glif, sempre precedit per un caràcter slash /*
+	
+```El PDF resultant```
+
 
 
 Genera dinàmicament via URL el cub de Noordzij clàssic en format PDF, amb tres paràmetres variables:
