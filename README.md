@@ -32,22 +32,14 @@ La sintaxi dins la URL és sensitiva a caixa, qualsevol canvi de majúscules/min
 
 *glif=* un sol (1) glif a compondre, descrit amb 4 notacions possibles:
 
-	> glif=/egrave *nom literal normatiu del glif è, sempre precedit per un caràcter slash /*
-	> glif=%E8 *codi hexadecimal del glif è, sempre precedit per un caràcter %*
-	> glif=232 *codi decimal del glif è*
-	> glif=è *escrivim directament el glif è*
+	glif=/egrave  …nom literal normatiu del glif è, sempre precedit per un caràcter slash /
+	glif=%E8      …codi hexadecimal del glif è, sempre precedit per un caràcter %
+	glif=232      …codi decimal del glif è
+	glif=è        …escrivim directament el glif è
 	
 ```El PDF resultant```
 
 
-
-Genera dinàmicament via URL el cub de Noordzij clàssic en format PDF, amb tres paràmetres variables:
-
-\# l'element constructor: un glif o paraula: AdobeSansMM té 235 glifs si via xifrat o via nom, no se'l localtza, l'algorisme escriurà ##
-
-\# instàncies (nombre d'elements constructors del costat del cub): de 1 fins a 15
-
-\# el cos de la tipografia: de # fins a 200 pt (el format de pàgina ve condicionat pel cos)
 
 Treballem de forma fixa dins la perspectiva isomètrica (xyz a 120° fugant al NO) que Gerrit Noordzij va glorificar a la portada de
 
@@ -60,23 +52,26 @@ L'ordre de creixement de l'eix Z de l'ample (/Width) és: el mínim a la lleixa 
 
 
 	URLs D'EXECUCIÓ
-									
-> text normal
 
-https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=é
+Les adreces que segueixen exploren sintaxi i formats diversos per un mateix glif:
 
-> codi hexadecimal
+> 5x5x5 instàncies, a cos 72, amb el glif è escrit amb text normal
 
-https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=%E9
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=è
 
-> nom del glif
+> 2x2x2 instàncies, a cos 200, amb el glif è escrit amb el seu codi hexadecimal
 
-https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=/eacute
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=2&cos=200&glif=%E8
 
-> amb el codi decimal
+> 10x10x10 instàncies, a cos 8, amb el glif è escrit amb el seu nom literal
 
-https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=72&glif=233
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=10&cos=8&glif=/egrave
 
+> 8x8x8 instàncies, a cos 120, amb el glif è escrit amb el seu codi decimal
+
+https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=8&cos=120&glif=232
+
+> adreça curta que genera de forma fixa un cub de Noordzij amb un glif **e** de 5x5x5
 
 https://ja.cat/NoordzijCub
 
