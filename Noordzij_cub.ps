@@ -51,19 +51,38 @@
 %% per defecte, a la solapa Articles s'etiqueta els glifs visibles (amb el cub muntat) amb un asterisc * al final
 %% per defecte, a la solapa Layers s'etiqueta el desplegable amb el nom literal del glif
 
-%% si traslladem el codi a JS/canvas, CSS, html podrem clonar el Cub de Noordzij localitzant una tipografia que
-%% tingui 3 eixos dinàmics de pes, serifa i contrast
+%% Mentre Ghostscript/Freetype no implementin operadors per treballar amb les OTF/TTF de forma similar a les MM
+%% haurem de treballar amb MM, o instàncies estàtiques ja generades en OTF/TTF o enllaçant amb una llibreria que sigui
+%% capaç de generar les instàncies 'on the fly' de les OTF/TTF variables, de manera que es puguin llegir des de GS
 
-%% Dins les MM, tenim d'altres alternatives:
+%% Dins les MM, tenim d'altres fonts a explorar:
 %% AdobeSerif MM, X,Y: pes, Z: ample
 %% AdobeMinion MM, X: pes , Y: ample , Z: correcció òptica (no operativa amb GS 10?)
 %% MoveMe MM de Lucas de Groot (no operativa amb GS 10?)
 
-%% aquest algorisme podria beure de valors aleatoris cada cop que s'executi
-%% aquest algorisme és ideal per fer-ne un paral·lel mirall entre l'ús de les MM i les vOTF via js/canvas/CSS/SVG
+%% Aquest algorisme és ideal per fer-ne un paral·lel mirall entre l'ús de les MM i les vOTF via js/canvas/CSS/SVG
+%% si traslladem el codi a JS/canvas, CSS, html podrem clonar el Cub de Noordzij localitzant una tipografia que
+%% tingui 3 eixos dinàmics de pes, serifa i contrast
 
-%% al Terminal la línia de comanda ha de dur el flag -dPDFSETTINGS=/prepress perquè no ens substitueixi la font!
+%% Aquest algorisme podria beure de valors aleatoris cada cop que s'executi
+
+%%Execució:
+
+%% la línia de comanda (al Terminal i PHP) ha de dur el flag -dPDFSETTINGS=/prepress perquè no ens substitueixi la font!
 %% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -f Noordzij_cub.ps
+
+%% via URL localhost: xyz= enter d'instàncies/glifs per costat, cos= real en punts del cos del glif, glif= glif a compondre
+%% (escrivint el glif) http://localhost/www.pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=è
+%% (escrivint el codi decimal) http://localhost/www.pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=232
+%% (escrivint el codi hexadecimal) http://localhost/www.pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=%E8
+%% (escrivint el nom literal) http://localhost/www.pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=/egrave
+
+%% via URL Internet: xyz= enter d'instàncies/glifs per costat, cos= real en punts del cos del glif, glif= glif a compondre
+%% (escrivint el glif) https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=è
+%% (escrivint el codi decimal) https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=232
+%% (escrivint el codi URL hexa) https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=%E8
+%% (escrivint el nom literal) https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=5&cos=200&glif=/egrave
+
 
 %%Assaig del comptador per veure com creix la distribució dins el cub
 false
@@ -186,7 +205,276 @@ Acmptdr  %% fem l'assaig del comptador per veure com creix la distribució dins e
    pop (e)  %% valor per defecte original del cub de Noordzij
   }
   {  %% té dades perquè executem via URL amb index_##.php (mètode $_POST) o amb cubNoordzij.php amb paràmetres (mètode $_GET)
-   {  %% què passa quan és el nom reservat d'un operador, p.e. showpage ?
+
+   %% si via URL a la variable d'entorn escrivim el glif... glif=è ...ens retorna una cadena octal/decimal... (\303\250)
+   %% si via URL a la variable d'entorn escrivim el decimal... glif=232 ...ens el retorna dins una cadena... (232)
+   %% si via URL a la variable d'entorn escrivim l'hexa... glif=%E8 ...ens el retorna en octal dins una cadena... (\350)
+   %% si via URL a la variable d'entorn escrivim el literal... glif=/egrave ...ens el retorna dins una cadena... (/egrave)
+
+   %% destriem la naturalesa la cadena capturada per la variable d'entorn glif=
+   %% si és un literal serà quan el primer caràcter de la cadena sigui un 47 i tingui més d'1 caràcter
+   dup dup 0 get 47 eq exch length 1 gt and
+   {  %% és un literal amb el nom del glif
+    cvx exec  %% l'executem
+   }
+   {  %% si és un codi decimal
+    dup true exch
+    {  %% ho serà quan tots els seus caràcters estinguin
+     dup 48 ge exch 57 le and and  %% entre el 0 i el 9
+    }forall
+    {  %% és un codi decimal i l'executem
+     %% tret que tingui només 1 sol caràcter
+     dup length 1 eq
+     {  %% és una cadena de text d'un numèric d'1 sol glif
+      true
+     }
+     {  %% és un codi decimal i l'executem
+      cvx exec false
+     }ifelse
+    }
+    {  %% és una cadena de text
+     true
+    }ifelse
+
+    {  %% escapcem la cadena de text en cas que pugui tenir més d'1 glif
+     dup length 1 ne
+     {  %% només si té més d'1 codi és possible que ens hagin escrit més d'1 caràcter 
+      %% si el primer codi és un 195 i no és una cadena d'1 sol caràcter, el glif estarà format per 2 codis octal (ex. Â)
+      dup 0 get 195 eq
+      {  %% extirpem els 2 primer codis
+       0 2 getinterval
+      }
+      {  %% si el primer codi és un 226 i no és una cadena d'1 sol caràcter, el glif estarà format per 3 codis octal (ex. /Euro)
+       dup 0 get 226 eq
+       {  %% extirpem els 3 primer codis
+        0 3 getinterval
+       }
+       {  %% si no és cap dels dos, tallem al primer codi i avall
+        0 1 getinterval
+       }ifelse
+      }ifelse
+     }if
+
+%%+ xifrarDESxifrar
+%% inici de la meitat del codi xifrarDESxifrar_HexUTF8_BinaryUTF8_BinaryCodePoint_Character.ps
+%% de UTF8 (hexa o bin) cap a U+#### (Character Code Point)
+ true  %% true: bin (octal/decimal) false: hexa
+ /binOhexa exch def  %% fem que l'input sigui del mateix format que l'output
+
+%(a)
+%(\350)
+% (\303\250)  %% decimal/octal: el glif è tal i com el captura el GS venint d'una variable URL
+ %(C3A8)  %% hexa
+
+% (24)  %% hexa / glif $ DOLLAR SIGN descrit a la taula d'exemple «UTF-8 encoding process» 1 octet d' Hex UTF-8
+% (C2A3)  %% hexa / glif £ POUND SIGN descrit a la taula d'exemple «UTF-8 encoding process» 2 octets d' Hex UTF-8 
+% (D098)  %% hexa / glif CYRILLIC CAPITAL LETTER I descrit a la taula d'exemple «UTF-8 encoding process» 2 octets d' Hex UTF-8
+% (E0A4B9)  %% hexa / glif DEVANAGARI LETTER HA descrit a la taula d'exemple «UTF-8 encoding process» 3 octets d' Hex UTF-8
+% (E282AC)  %% hexa / glif EURO SIGN descrit a la taula d'exemple «UTF-8 encoding process» 3 octets d' Hex UTF-8
+%(\342\202\254)  %% decimal/octal / glif EURO SIGN
+% (ED959C)  %% hexa / glif HANGUL SYLLABLE HAN descrit a la taula d'exemple «UTF-8 encoding process» 3 octets d' Hex UTF-8
+% (F0908D88)  %% hexa / glif GOTHIC LETTER HWAIR descrit a la taula d'exemple «UTF-8 encoding process» 4 octets d' Hex UTF-8
+% (F0A8899F)  %% hexa / glif CJK UNIFIED IDEOGRAPH-2825F (taula d'exemple en vietnamès) 4 octets d' Hex UTF-8
+%(\360\237\216\266)  %% decimal/octal EMOJI MULTIPLE MUSICAL NOTES
+
+ /_UTF8 exch def
+
+ %% ens cal passar la cadena 1 glif (sigui decimal/octal o hexa) a binari
+ binOhexa  %% detectem si és decimal/octal o hexa?
+ {  %% decimal/octal
+  _UTF8 dup length 8 mul  %% 8 bits per octet
+  dup /net_UTF8 exch def
+  2 add
+  string  %% buffer d'escriptura
+  /mascaraRadix_UTF8 exch def  %% fem la màscara del radix number en funció de /U+####
+  %% fitxer d'escriptura de la mascaraRadix amb pel codi binari
+  mascaraRadix_UTF8 /NullEncode filter /FCbinari exch def
+  %% cap del radix number
+  FCbinari (2#) writestring
+ }
+ {  %% hexa
+  _UTF8 dup length dup 2 idiv /faBin exch def
+  4 mul  %% 4 bits per caràcter hexa
+  dup /net_UTF8 exch def
+  2 add
+  string  %% buffer d'escriptura
+  /mascaraRadix_UTF8 exch def  %% fem la màscara del radix number en funció de /U+####
+  %% fitxer d'escriptura de la mascaraRadix amb pel codi binari
+  mascaraRadix_UTF8 /NullEncode filter /FCbinari exch def
+  %% cap del radix number
+  FCbinari (2#) writestring
+  %% convertim la cadena hexa a string decimal/octal
+  /ASCIIHexDecode filter faBin string readstring pop
+ }ifelse
+
+ {  %% per tots els otets de la cadena que tenim a l'stack
+  2 8 string cvrs  %% conversió del caràcter decimal a cadena binària
+  dup length 8 exch sub
+  {  %% farcim de zeros a l'esquerra, si en manquen
+   FCbinari 48 write  %% escriu zeros
+  }repeat
+  FCbinari exch writestring  %% escriu la cadena significativa de l'octet
+ }forall
+
+ %% llistem
+ FCbinari dup flushfile closefile  %% bufem el buffer i tanquem el fitxer d'escriptura
+
+ %% el nombre d'octets per comparar
+ binOhexa  %% detectem si és decimal/octal o hexa?
+ {  %% decimal/octal
+  _UTF8 length
+ }
+ {  %% hexa
+  _UTF8 length 2 idiv
+ }ifelse
+
+ %% taula de conversió de UTF-8 a CodePoint/CharacterU+ per l'estratègia d'extirpació de bits
+ dup 1 le  %% és més petit o igual que?
+ {  %% UTF-8 d'1 octet significatiu
+  pop
+  (2#0000000000000000)
+  dup /mascaraRadix_BinaryCodePointCharU+ exch def
+  mascaraRadix_UTF8
+  %% si el darrer bit és un 1 no fem el farcit del CodePoint
+%  dup 3 get 48 eq  %% és un zero?
+%  {
+%   dup length 7 sub 7 getinterval   %% tram del primer octet
+%   exch dup length 7 sub 3 -1 roll putinterval  %% farcim el primer octet
+%  }
+%  {
+%% reescrivim sempre sencer el seu codi binari!
+   dup length 8 sub 8 getinterval   %% tram del primer octet
+   exch dup length 8 sub 3 -1 roll putinterval  %% farcim el primer octet
+%  }ifelse
+
+  %% com volem el resultat (bin o hexa?)
+  mascaraRadix_BinaryCodePointCharU+
+
+  binOhexa  %% respectem el mateix xifrat de sortida que el d'entrada
+  {  %% bin
+   cvx exec
+   %==
+  }
+  {  %% hexa
+   cvx exec
+   16 2 string cvrs %== 
+  }ifelse
+
+  %(1 octet)==
+ }
+ {
+  dup 2 le  %% és més petit o igual que?
+  {  %% UTF-8 de 2 octets significatius
+   pop
+   (2#0000000000000000)
+   /mascaraRadix_BinaryCodePointCharU+ exch def
+   mascaraRadix_UTF8
+   dup length 13 sub 5 getinterval  %% tram del primer octet
+   mascaraRadix_BinaryCodePointCharU+ dup length 11 sub 3 -1 roll putinterval  %% farcim el primer octet
+   mascaraRadix_UTF8
+   dup length 6 sub 6 getinterval  %% tram del segon octet
+   mascaraRadix_BinaryCodePointCharU+ dup length 6 sub 3 -1 roll putinterval  %% farcim el segon octet
+
+   %% com volem el resultat (bin o hexa?)
+   mascaraRadix_BinaryCodePointCharU+
+
+   binOhexa  %% respectem el mateix xifrat de sortida que el d'entrada
+   {  %% bin
+    cvx exec
+    %==
+   }
+   {  %% hexa
+    cvx exec
+    16 4 string cvrs %== 
+   }ifelse
+
+   %(2 octets)==
+  }
+  {
+   dup 3 le  %% és més petit o igual que?
+   {  %% UTF-8 de 3 octets significatius
+    pop
+    (2#000000000000000000000000)
+    /mascaraRadix_BinaryCodePointCharU+ exch def
+    mascaraRadix_UTF8
+    dup length 20 sub 4 getinterval  %% tram del primer octet
+    mascaraRadix_BinaryCodePointCharU+ dup length 16 sub 3 -1 roll putinterval  %% farcim el primer octet
+    mascaraRadix_UTF8
+    dup length 14 sub 6 getinterval  %% tram del segon octet
+    mascaraRadix_BinaryCodePointCharU+ dup length 12 sub 3 -1 roll putinterval  %% farcim el segon octet
+    mascaraRadix_UTF8
+    dup length 6 sub 6 getinterval  %% tram del tercer octet
+    mascaraRadix_BinaryCodePointCharU+ dup length 6 sub 3 -1 roll putinterval  %% farcim el tercer octet
+
+    %% com volem el resultat (bin o hexa?)
+    mascaraRadix_BinaryCodePointCharU+
+
+    binOhexa  %% respectem el mateix xifrat de sortida que el d'entrada
+    {  %% bin
+     cvx exec
+     %==
+    }
+    {  %% hexa
+     cvx exec
+     16 6 string cvrs %== 
+    }ifelse
+
+    %(3 octets)==
+   }
+   {
+    4 le  %% és més petit o igual que?
+    {  %% UTF-8 de 4 octets significatius
+     (2#00000000000000000000000000000000)
+     /mascaraRadix_BinaryCodePointCharU+ exch def
+     mascaraRadix_UTF8
+     dup length 27 sub 3 getinterval  %% tram del primer octet
+     mascaraRadix_BinaryCodePointCharU+ dup length 21 sub 3 -1 roll putinterval  %% farcim el primer octet
+     mascaraRadix_UTF8
+     dup length 22 sub 6 getinterval  %% tram del segon octet
+     mascaraRadix_BinaryCodePointCharU+ dup length 18 sub 3 -1 roll putinterval  %% farcim el segon octet
+     mascaraRadix_UTF8
+     dup length 14 sub 6 getinterval  %% tram del tercer octet
+     mascaraRadix_BinaryCodePointCharU+ dup length 12 sub 3 -1 roll putinterval  %% farcim el tercer octet
+     mascaraRadix_UTF8
+     dup length 6 sub 6 getinterval  %% tram del quart octet
+     mascaraRadix_BinaryCodePointCharU+ dup length 6 sub 3 -1 roll putinterval  %% farcim el quart octet
+
+     %% com volem el resultat (bin o hexa?)
+     mascaraRadix_BinaryCodePointCharU+
+
+     binOhexa  %% respectem el mateix xifrat de sortida que el d'entrada
+     {  %% bin
+      cvx exec
+      %==
+     }
+     {  %% hexa
+      cvx exec
+      16 8 string cvrs %== 
+     }ifelse
+
+     %(4 octets)==
+    }
+    {
+     (\n\n >> Cagada pastoret !\n\n)print flush exit
+    }ifelse
+   }ifelse
+  }ifelse
+ }ifelse
+
+%% final de la meitat del codi xifrarDESxifrar_HexUTF8_BinaryUTF8_BinaryCodePoint_Character.ps
+%%+ xifrarDESxifrar
+%(xifrarDESxifrar)pstack exit
+    }if  %% escapcem la cadena de text en cas que pugui tenir més d'1 glif
+
+
+   }ifelse
+
+(FORA)pstack exit
+
+%%Desactivem l'estratègia de substitució parcial en favor de l'algorisme xifrarDESxifrar
+false{
+
+   {  %% PETA! quan és el nom reservat d'un operador, p.e. showpage ?
     dup cvx exec  %% executem l'string per saber si és una cadena de text (pot ser també un nom o un decimal)
    }stopped
    {  %% és una cadena de text
@@ -594,16 +882,22 @@ exch pop  %% ens carreguem mark
     exch pop
 %(un codi decimal o un literal)pstack exit
    }ifelse
-  }ifelse
+
+%%Desactivem l'estratègia de substitució parcial en favor de l'algorisme xifrarDESxifrar
+}if
+
+
+  }ifelse  %% té dades perquè executem via URL
  }
  {  %% la variable d'entorn NO existeix perquè executem l'applet en local via Terminal per línia de comanda
   %% aquí ens cal escriure d'una d'aquestes tres maneres:
-/periodcentered   %% /e literal  %% 101 decimal  %% (ei) cadena de text, però ara hi tenim un escapçador al primer glif!
+  (Ñ) % /periodcentered %% /e literal  %% 101 decimal  %% (ei) cadena de text, però ara hi tenim un escapçador al primer glif!
   %% (\n Ghostscript no pot capturar aquesta variable d'entorn!\n\n)print flush
  }ifelse
 
 }ifelse
 dup /gDocInfo exch def
+
 /glif exch def
 
 /ESaCharStrings? false def  %% gatell per saber si hem de cercar el literal dins els glifs definits a la font de treball
