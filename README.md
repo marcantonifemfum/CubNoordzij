@@ -42,13 +42,18 @@ La sintaxi dins la URL és sensitiva a caixa, qualsevol canvi de majúscules/min
 Un cop activem la URL d'execució dins la barra d'acreces d'un navegador, en pocs segons s'interpreta l'algorisme i es genera un PDF que apareix en pantalla (del navegador o visor de PDF) o es descarrega (depenent del dispositiu des d'on ens connectem).
 
 	Contingut de pàgina
-Gerrit Noordzij va glorificar a la portada del llibre «[De streek Theorie van het schrift](https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg)» un cub en perpectiva isomètrica (XYZ a 120° fugant la Z al NO)
+Gerrit Noordzij va glorificar a la portada del llibre «[De streek Theorie van het schrift](https://www.typemag.org/images/uploads/Noordzij_Streek_original_cover.jpg)» un cub tipogràfic en perspectiva isomètrica (XYZ a 120° fugant la Z al NO) que permet visonar la variabilitat del ductus d'un mateix glif en molts aspectes.
+
+En aquest prototip millorem encara més la visió 
+
+
+
 
 	Solapa lleixes (layers)
-
+L'ordre de 
 
 	Solapa Articles
-
+L'ordre de 
 
 	DocInfo (propietats del document) 
 
