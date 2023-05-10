@@ -8,7 +8,7 @@
 
 ```El codi```
 
-[Noordzij_cub.ps](https://github.com/marcantonifemfum/CubNoordzij/blob/main/Noordzij_cub.ps) és l'algorisme, escrit en llenguatge PostScript, que genera dinàmicament l'icònic cub de Gerrit Noordzij, amb un ampli espectre de variables, tres de les quals són configurables via URL a través de les variables: xyz (instàncies 3D), cos i glif
+[Noordzij_cub.ps](https://github.com/marcantonifemfum/CubNoordzij/blob/main/Noordzij_cub.ps) és l'algorisme, escrit en llenguatge PostScript, que genera dinàmicament l'icònic cub de Gerrit Noordzij, amb un ampli espectre de variables, tres de les quals són configurables via URL a través de les variables: *xyz* (instàncies 3D), *cos* i *glif*.
 
 ```La tipografia```
 
@@ -31,7 +31,11 @@ La sintaxi dins la URL és sensitiva a caixa, qualsevol canvi de majúscules/min
 *cos=* cos del glif en punts tipogràfics. Pot ser un nombre enter amb decimals, entre 2 i 200 punts. El seu valor i el de xyz condicionen el format de pàgina.
 
 *glif=* un sol (1) glif a compondre, descrit amb 4 notacions possibles:
-	> glif=/egrave *nom literal normatiu del glif, sempre precedit per un caràcter slash /*
+
+	> glif=/egrave *nom literal normatiu del glif è, sempre precedit per un caràcter slash /*
+	> glif=%E8 *codi hexadecimal del glif è, sempre precedit per un caràcter %*
+	> glif=232 *codi decimal del glif è*
+	> glif=è *escrivim directament el glif è*
 	
 ```El PDF resultant```
 
