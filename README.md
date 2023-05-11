@@ -13,7 +13,7 @@
 
 ```La tipografia```
 
-*Adobe Sans MM* és la tipografia (Multiple Master) de treball per aquest prototip. Té 2 eixos mestres (masters) dinàmics: /Weight i /Width, amb un ampli rang de valors d'instàncies que van de 50 a 1450. Aquesta font és a totes les màquines que tenen instal·lat AcrobatReader.
+*Adobe Sans MM* és la tipografia (Multiple Master) de treball per aquest prototip. Té 2 eixos mestres (masters) dinàmics: /Weight i /Width, amb un ampli rang de valors d'instàncies que van de 50 a 1450. Disposa d'un joc de 230 glifs. Aquesta font és a totes les màquines que tenen instal·lat Adobe Acrobat Reader, com a recurs automàtic de substitució de tipografies.
 
 
 ```l'Intèrpret```
@@ -95,6 +95,8 @@ https://ja.cat/NoordzijCub
 	ERRORS
 
 Alguns descuits en la sintaxi d'escriptura de la URL poden provocar errors d'execució, en forma d'un PDF en blanc o en forma d'una pàgina informativa on se'ns donen detalls del què ha passat. Per exemple, si al camp *xyz=* hi posem un text en comptes d'un numèric, succeix això… https://pliegos.net/maker/GerritNoordzij/cubNoordzij.php?xyz=aeiou&cos=72&glif=/germandbls
+
+També, quan un determinat glif no es localitza, per error de codi, o nom, o senzillament és inexistent dins el joc de caràcters de la font, l'algorisme el substitueix pel signe… # (numbersign).
 
 
 	VISORS DE PDF
